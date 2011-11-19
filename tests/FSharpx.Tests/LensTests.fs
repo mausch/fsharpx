@@ -12,14 +12,11 @@ type Car = {
     Mileage: int
 } with 
     static member make = 
-        { Lens.Get = fun (x: Car) -> x.Make
-          Set = fun v (x: Car) -> { x with Make = v } }
+        Lens.create((fun (x: Car) -> x.Make), (fun v x -> { x with Make = v }))
     static member model = 
-        { Lens.Get = fun (x: Car) -> x.Model
-          Set = fun v (x: Car) -> { x with Model = v } }
+        Lens.create((fun (x: Car) -> x.Model), (fun v x -> { x with Model = v }))
     static member mileage = 
-        { Lens.Get = fun (x: Car) -> x.Mileage
-          Set = fun v (x: Car) -> { x with Mileage = v } }
+        Lens.create((fun (x: Car) -> x.Mileage), (fun v x -> { x with Mileage = v }))
 
 type Editor = {
     Name: string
@@ -27,11 +24,9 @@ type Editor = {
     Car: Car
 } with
     static member salary =
-        { Lens.Get = fun (x: Editor) -> x.Salary
-          Set = fun v (x: Editor) -> { x with Salary = v } }
+        Lens.create((fun (x: Editor) -> x.Salary), (fun v x -> { x with Salary = v }))
     static member car = 
-        { Lens.Get = fun (x: Editor) -> x.Car
-          Set = fun v (x: Editor) -> { x with Car = v } }
+        Lens.create((fun (x: Editor) -> x.Car), (fun v x -> { x with Car = v }))
 
 type Book = {
     Name: string
@@ -39,8 +34,7 @@ type Book = {
     Editor: Editor
 } with
     static member editor =
-        { Lens.Get = fun (x: Book) -> x.Editor
-          Set = fun v (x: Book) -> { x with Editor = v } }
+        Lens.create((fun (x: Book) -> x.Editor), (fun v x -> { x with Editor = v }))
 
 let giveRaise v = Lens.update ((+) v) Editor.salary
 
@@ -177,14 +171,11 @@ type Product = {
     PriceWithoutTax: int
 } with 
     static member name =
-        { Get = fun (x: Product) -> x.Name 
-          Set = fun v (x: Product) -> { x with Name = v } }
+        Lens.create((fun (x: Product) -> x.Name), (fun v x -> { x with Name = v }))
     static member priceWithTax =
-        { Get = fun (x: Product) -> x.PriceWithTax
-          Set = fun v (x: Product) -> { x with PriceWithTax = v } }
+        Lens.create((fun (x: Product) -> x.PriceWithTax), (fun v x -> { x with PriceWithTax = v }))
     static member priceWithoutTax =
-        { Get = fun (x: Product) -> x.PriceWithoutTax
-          Set = fun v (x: Product) -> { x with PriceWithoutTax = v } }
+        Lens.create((fun (x: Product) -> x.PriceWithoutTax), (fun v x -> { x with PriceWithoutTax = v }))
 
 let productPrice = 
     Lens.cond (Product.name.Get >> Strings.contains "book") 
@@ -197,7 +188,7 @@ let LensCond() = checkLens "cond" productPrice
 [<Test>]
 let LensListMap() = 
     let l = Lens.listMap Car.mileage
-    // can't test with FsCheck, it passes lists of different lenghts.
+    // can't test with FsCheck, it passes lists of different lengths.
     // checkLens "listMap" l
     let cars = [hondaAccura; bmwE90]
     let getSet = LensProperties.GetSet l cars
