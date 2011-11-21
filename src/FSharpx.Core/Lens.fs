@@ -19,7 +19,10 @@ module Lens =
 
     /// Sequentially composes two lenses
     let inline compose (l1: Lens<_,_>) (l2: Lens<_,_>) = 
-        create(l2.Get >> l1.Get, l1.Set >> l2.Update)
+        { new Lens<_,_>() with
+            override x.Get = l2.Get >> l1.Get
+            override x.Set = l1.Set >> l2.Update 
+            override x.Update = l1.Update >> l2.Update }
 
     /// Composes two lenses through a sum in the source
     let inline choice (l1: Lens<_,_>) (l2: Lens<_,_>) = 
