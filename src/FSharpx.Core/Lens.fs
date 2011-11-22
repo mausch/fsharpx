@@ -12,29 +12,41 @@ module Lens =
     let inline set v a (l: Lens<_,_>) = l.Set v a
     let inline update f (l: Lens<_,_>) = l.Update f
 
+    let debug (get,set,update) (l: Lens<_,_>) =
+        { Get = fun a -> get a; l.Get a
+          Set = fun b a -> set b a; l.Set b a
+          Update = fun f a -> update a; l.Update f a }
+
+    let debugPrint name =
+        debug (printfn "%s get %A" name, printfn "%s set %A %A" name, printfn "%s update %A" name)
+
     /// Creates a state-lens. Defines Update in terms of Get/Set.
     let slens(get, set) = 
         { Get = get
           Set = set
           Update = fun f a -> set (f(get a)) a }
+        //|> debugPrint "slens"
 
     /// Creates an update-lens. Defines Set in terms of Update.
     let ulens(get, update) = 
         { Get = get
           Set = konst >> update
           Update = update }
+        // |> debugPrint "ulens"
 
     /// Sequentially composes two lenses
     let inline compose (l1: Lens<_,_>) (l2: Lens<_,_>) = 
         { Get = l2.Get >> l1.Get
           Set = l1.Set >> l2.Update
           Update = l1.Update >> l2.Update }
+        // |> debugPrint "compose"
 
     /// Composes two lenses through a sum in the source
     let inline choice (l1: Lens<_,_>) (l2: Lens<_,_>) = 
         { Get = Choice.choice l1.Get l2.Get
           Set = fun b -> Choice.bimap (l1.Set b) (l2.Set b)
           Update = fun f -> Choice.bimap (l1.Update f) (l2.Update f) }
+        // |> debugPrint "choice"
 
     /// Pair two lenses  
     let inline pair (l1: Lens<_,_>) (l2: Lens<_,_>) = 
@@ -120,10 +132,12 @@ module Lens =
         let inline get l = List.nth l i
         let inline update f = List.mapi (fun j e -> if j = i then f e else e)
         ulens(get, update)
+        //|> debugPrint "forList"
 
     /// Creates a lens that maps the given lens in a list
     let listMap (l: Lens<_,_>) =
         slens(List.map l.Get, List.map2 l.Set)
+        //|> debugPrint "listMap"
 
     /// Creates a lens that maps the given lens in an array
     let arrayMap (l: Lens<_,_>) = 
