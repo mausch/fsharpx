@@ -107,7 +107,7 @@ module Lens =
     /// Identity lens
     let id<'a> : Lens<'a,'a> = slens(Operators.id, konst)
 
-    let codiag<'a> = choice id id
+    let codiag<'a> : Lens<Choice<'a,'a>,'a> = choice id id
 
     /// Lens for a particular value in a set
     let forSet value =
@@ -161,7 +161,7 @@ module Lens =
 //        { Get = (!)
 //          Set = fun v a -> a := v; a }
 
-    let ignore<'a> = slens(ignore, fun _ v -> v)
+    let ignore<'a> : Lens<'a,unit> = slens(ignore, fun _ v -> v)
 
     module Operators = 
         let inline (>>|) l1 l2 = compose l2 l1
