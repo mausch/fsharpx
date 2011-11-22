@@ -1,10 +1,10 @@
 ﻿namespace FSharpx
 
-type Lens<'a, 'b> = 
-    abstract Get: ('a -> 'b)
-    abstract Set: ('b -> 'a -> 'a)
-    abstract Update: (('b -> 'b) -> 'a -> 'a)
-
+type Lens<'a, 'b> = {
+    Get: 'a -> 'b
+    Set: 'b -> 'a -> 'a
+    Update: ('b -> 'b) -> 'a -> 'a
+}
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Lens =
@@ -14,29 +14,27 @@ module Lens =
 
     /// Creates a state-lens. Defines Update in terms of Get/Set.
     let slens(get, set) = 
-        { new Lens<_,_> with
-            member x.Get = get
-            member x.Set = set 
-            member x.Update = fun f a -> x.Set (f(x.Get a)) a }
+        { Get = get
+          Set = set
+          Update = fun f a -> set (f(get a)) a }
 
     /// Creates an update-lens. Defines Set in terms of Update.
     let ulens(get, update) = 
-        { new Lens<_,_> with
-            member x.Get = get
-            member x.Set = konst >> x.Update
-            member x.Update = update }
+        { Get = get
+          Set = konst >> update
+          Update = update }
 
     /// Sequentially composes two lenses
     let inline compose (l1: Lens<_,_>) (l2: Lens<_,_>) = 
-        { new Lens<_,_> with
-            member x.Get = l2.Get >> l1.Get
-            member x.Set = l1.Set >> l2.Update 
-            member x.Update = l1.Update >> l2.Update }
+        { Get = l2.Get >> l1.Get
+          Set = l1.Set >> l2.Update
+          Update = l1.Update >> l2.Update }
 
     /// Composes two lenses through a sum in the source
     let inline choice (l1: Lens<_,_>) (l2: Lens<_,_>) = 
-        slens(Choice.choice l1.Get l2.Get,
-              fun b -> Choice.bimap (l1.Set b) (l2.Set b))
+        { Get = Choice.choice l1.Get l2.Get
+          Set = fun b -> Choice.bimap (l1.Set b) (l2.Set b)
+          Update = fun f -> Choice.bimap (l1.Update f) (l2.Update f) }
 
     /// Pair two lenses  
     let inline pair (l1: Lens<_,_>) (l2: Lens<_,_>) = 
@@ -50,7 +48,12 @@ module Lens =
     /// </summary>
     let cond pred lensTrue lensFalse =
         let inline choose a = if pred a then lensTrue else lensFalse
-        slens((fun a -> choose a |> get a), (fun b a -> choose a |> set b a))
+        { Get = fun a -> choose a |> get a
+          Set = fun b a -> choose a |> set b a
+          Update = 
+            fun f a ->
+                let l = choose a 
+                update f l a }
 
     /// Applies a lens in the 'get' direction within a state monad      
     let getState l = 
@@ -90,7 +93,7 @@ module Lens =
         slens(Operators.snd, set) 
 
     /// Identity lens
-    let id<'a> : Lens<'a,'a> = upcast slens(Operators.id, konst)
+    let id<'a> : Lens<'a,'a> = slens(Operators.id, konst)
 
     let codiag<'a> = choice id id
 
