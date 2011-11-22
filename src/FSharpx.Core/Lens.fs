@@ -149,7 +149,9 @@ module Lens =
 
     /// Applies an isomorphism to the value viewed through a lens
     let xmap f g (l: Lens<_,_>) = 
-        slens(l.Get >> f, g >> l.Set)
+        { Get = l.Get >> f
+          Set = g >> l.Set
+          Update = fun ff -> l.Update (f >> ff >> g) }
 
     /// Converts a lens that views a list into a lens that views an array
     let inline listToArray l = xmap List.toArray Array.toList l
