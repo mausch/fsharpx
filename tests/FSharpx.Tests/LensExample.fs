@@ -8,31 +8,31 @@ type Monster = {
     Awake: bool
 } with 
     static member awake =
-        Lens.slens((fun (x: Monster) -> x.Awake), (fun v x -> { x with Awake = v }))
+        Lens.fromGetSet((fun (x: Monster) -> x.Awake), (fun v x -> { x with Awake = v }))
 
 type Room = {
     Locked: bool
     Monsters: Monster list
 } with
     static member locked = 
-        Lens.slens((fun (x: Room) -> x.Locked), (fun v x -> { x with Locked = v }))
+        Lens.fromGetSet((fun (x: Room) -> x.Locked), (fun v x -> { x with Locked = v }))
     static member monsters = 
-        Lens.slens((fun (x: Room) -> x.Monsters), (fun v x -> { x with Monsters = v }))
+        Lens.fromGetSet((fun (x: Room) -> x.Monsters), (fun v x -> { x with Monsters = v }))
 
 type Level = {
     Illumination: int
     Rooms: Room list
 } with
     static member illumination = 
-        Lens.slens((fun (x: Level) -> x.Illumination), (fun v x -> { x with Illumination = v }))
+        Lens.fromGetSet((fun (x: Level) -> x.Illumination), (fun v x -> { x with Illumination = v }))
     static member rooms = 
-        Lens.slens((fun (x: Level) -> x.Rooms), (fun v x -> { x with Rooms = v }))
+        Lens.fromGetSet((fun (x: Level) -> x.Rooms), (fun v x -> { x with Rooms = v }))
     
 type Dungeon = {
     Levels: Level list
 } with
     static member levels =
-        Lens.slens((fun (x: Dungeon) -> x.Levels), (fun v x -> { x with Levels = v }))
+        Lens.fromGetSet((fun (x: Dungeon) -> x.Levels), (fun v x -> { x with Levels = v }))
     static member print (d: Dungeon) = 
         d.Levels 
         |> List.iteri (fun i e -> 

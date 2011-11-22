@@ -11,11 +11,11 @@ type Car = {
     Mileage: int
 } with 
     static member make = 
-        Lens.slens((fun (x: Car) -> x.Make), (fun v x -> { x with Make = v }))
+        Lens.fromGetSet((fun (x: Car) -> x.Make), (fun v x -> { x with Make = v }))
     static member model = 
-        Lens.slens((fun (x: Car) -> x.Model), (fun v x -> { x with Model = v }))
+        Lens.fromGetSet((fun (x: Car) -> x.Model), (fun v x -> { x with Model = v }))
     static member mileage = 
-        Lens.slens((fun (x: Car) -> x.Mileage), (fun v x -> { x with Mileage = v }))
+        Lens.fromGetSet((fun (x: Car) -> x.Mileage), (fun v x -> { x with Mileage = v }))
 
 type Editor = {
     Name: string
@@ -23,9 +23,9 @@ type Editor = {
     Car: Car
 } with
     static member salary =
-        Lens.slens((fun (x: Editor) -> x.Salary), (fun v x -> { x with Salary = v }))
+        Lens.fromGetSet((fun (x: Editor) -> x.Salary), (fun v x -> { x with Salary = v }))
     static member car = 
-        Lens.slens((fun (x: Editor) -> x.Car), (fun v x -> { x with Car = v }))
+        Lens.fromGetSet((fun (x: Editor) -> x.Car), (fun v x -> { x with Car = v }))
 
 type Book = {
     Name: string
@@ -33,7 +33,7 @@ type Book = {
     Editor: Editor
 } with
     static member editor =
-        Lens.slens((fun (x: Book) -> x.Editor), (fun v x -> { x with Editor = v }))
+        Lens.fromGetSet((fun (x: Book) -> x.Editor), (fun v x -> { x with Editor = v }))
 
 let giveRaise v = Lens.update ((+) v) Editor.salary
 
@@ -177,11 +177,11 @@ type Product = {
     PriceWithoutTax: int
 } with 
     static member name =
-        Lens.slens((fun (x: Product) -> x.Name), (fun v x -> { x with Name = v }))
+        Lens.fromGetSet((fun (x: Product) -> x.Name), (fun v x -> { x with Name = v }))
     static member priceWithTax =
-        Lens.slens((fun (x: Product) -> x.PriceWithTax), (fun v x -> { x with PriceWithTax = v }))
+        Lens.fromGetSet((fun (x: Product) -> x.PriceWithTax), (fun v x -> { x with PriceWithTax = v }))
     static member priceWithoutTax =
-        Lens.slens((fun (x: Product) -> x.PriceWithoutTax), (fun v x -> { x with PriceWithoutTax = v }))
+        Lens.fromGetSet((fun (x: Product) -> x.PriceWithoutTax), (fun v x -> { x with PriceWithoutTax = v }))
 
 let productPrice = 
     Lens.cond (Product.name.Get >> Strings.contains "book") 

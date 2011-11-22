@@ -21,14 +21,14 @@ module Lens =
         debug (printfn "%s get %A" name, printfn "%s set %A %A" name, printfn "%s update %A" name)
 
     /// Creates a state-lens. Defines Update in terms of Get/Set.
-    let slens(get, set) = 
+    let fromGetSet(get, set) = 
         { Get = get
           Set = set
           Update = fun f a -> set (f(get a)) a }
-        //|> debugPrint "slens"
+        //|> debugPrint "fromGetSet"
 
     /// Creates an update-lens. Defines Set in terms of Update.
-    let ulens(get, update) = 
+    let fromGetUpdate(get, update) = 
         { Get = get
           Set = konst >> update
           Update = update }
@@ -50,8 +50,8 @@ module Lens =
 
     /// Pair two lenses  
     let inline pair (l1: Lens<_,_>) (l2: Lens<_,_>) = 
-        slens((fun (a,b) -> (l1.Get a, l2.Get b)),
-              (fun (a,c) (b,d) -> (l1.Set a b, l2.Set c d)))
+        fromGetSet((fun (a,b) -> (l1.Get a, l2.Get b)),
+                   (fun (a,c) (b,d) -> (l1.Set a b, l2.Set c d)))
 
     /// <summary>
     /// <paramref name="pred"/> is applied to source. 
@@ -97,22 +97,22 @@ module Lens =
     /// Gets/sets the fst element in a pair
     let fst<'a,'b> : Lens<'a * 'b,'a> =
         let inline set v a = v, Operators.snd a
-        slens(Operators.fst, set)
+        fromGetSet(Operators.fst, set)
 
     /// Gets/sets the snd element in a pair
     let snd<'a,'b> : Lens<'a * 'b,'b> =
         let inline set v a = Operators.fst a, v
-        slens(Operators.snd, set) 
+        fromGetSet(Operators.snd, set) 
 
     /// Identity lens
-    let id<'a> : Lens<'a,'a> = slens(Operators.id, konst)
+    let id<'a> : Lens<'a,'a> = fromGetSet(Operators.id, konst)
 
     let codiag<'a> : Lens<Choice<'a,'a>,'a> = choice id id
 
     /// Lens for a particular value in a set
     let forSet value =
         let inline set contains = (if contains then Set.add else Set.remove) value
-        slens(Set.contains value, set)
+        fromGetSet(Set.contains value, set)
 
     /// Lens for a particular key in a map
     let forMap key = 
@@ -120,32 +120,32 @@ module Lens =
             function
             | Some value -> Map.add key value
             | None -> Map.remove key
-        slens(Map.tryFind key, set)
+        fromGetSet(Map.tryFind key, set)
 
     /// Lens for a particular position in an array
     let forArray i = 
         let inline set v = Array.copy >> Array.setAt i v
-        slens(Array.nth i, set)
+        fromGetSet(Array.nth i, set)
 
     /// Lens for a particular position in a list
     let forList i =
         let inline get l = List.nth l i
         let inline update f = List.mapi (fun j e -> if j = i then f e else e)
-        ulens(get, update)
+        fromGetUpdate(get, update)
         //|> debugPrint "forList"
 
     /// Creates a lens that maps the given lens in a list
     let listMap (l: Lens<_,_>) =
-        slens(List.map l.Get, List.map2 l.Set)
+        fromGetSet(List.map l.Get, List.map2 l.Set)
         //|> debugPrint "listMap"
 
     /// Creates a lens that maps the given lens in an array
     let arrayMap (l: Lens<_,_>) = 
-        slens(Array.map l.Get, Array.map2 l.Set)
+        fromGetSet(Array.map l.Get, Array.map2 l.Set)
 
     /// Creates a lens that maps the given lens in a sequence
     let seqMap (l: Lens<_,_>) = 
-        slens(Seq.map l.Get, Seq.map2 l.Set)
+        fromGetSet(Seq.map l.Get, Seq.map2 l.Set)
 
     /// Applies an isomorphism to the value viewed through a lens
     let xmap f g (l: Lens<_,_>) = 
@@ -161,7 +161,7 @@ module Lens =
 //        { Get = (!)
 //          Set = fun v a -> a := v; a }
 
-    let ignore<'a> : Lens<'a,unit> = slens(ignore, fun _ v -> v)
+    let ignore<'a> : Lens<'a,unit> = fromGetSet(ignore, fun _ v -> v)
 
     module Operators = 
         let inline (>>|) l1 l2 = compose l2 l1
