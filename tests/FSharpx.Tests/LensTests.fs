@@ -2,9 +2,8 @@
 
 open System
 open NUnit.Framework
-open FSharpx.Lens.Operators
-open FsCheck
 open FsCheck.NUnit
+open FSharpx.Lens.Operators
 
 type Car = {
     Make: string
@@ -121,11 +120,13 @@ let stateMonadOperators2() =
 
 type LensProperties =
     /// If the view does not change, neither should the source.
-    static member GetSet (l: Lens<_,_>) a = l.Set (l.Get a) a = a
+    static member GetSet (l: Lens<_,_>) a = 
+        l.Set (l.Get a) a = a
 
     /// Updates should be "translated exactly" - i.e., to a source
     /// structure for which get yields exactly the updated target structure
-    static member SetGet (l: Lens<_,_>) a b = l.Get (l.Set b a) = b
+    static member SetGet (l: Lens<_,_>) a b = 
+        l.Get (l.Set b a) = b
 
     /// Each update should completely overwrite the effect of the
     /// previous one. Thus, the effect of two sets in a row
@@ -135,11 +136,16 @@ type LensProperties =
         let s = l.Set b c
         p = s
 
+    // Update must be semantically equivalent to get then f then set
+    static member UpdateEq (l: Lens<_,_>) f x =
+        l.Update f x = l.Set (f(l.Get x)) x
+
 let checkLens name lens = 
     let tname = sprintf "%s: %s" name
-    fsCheck (tname "GetSet") (LensProperties.GetSet lens)
-    fsCheck (tname "SetGet") (LensProperties.SetGet lens)
-    fsCheck (tname "SetSet") (LensProperties.SetSet lens)
+    fsCheck (tname "GetSet")   (LensProperties.GetSet lens)
+    fsCheck (tname "SetGet")   (LensProperties.SetGet lens)
+    fsCheck (tname "SetSet")   (LensProperties.SetSet lens)
+    fsCheck (tname "UpdateEq") (LensProperties.UpdateEq lens)
 
 [<Test>] 
 let LensId() = checkLens "Id" Lens.id
