@@ -50,8 +50,9 @@ module Lens =
 
     /// Pair two lenses  
     let inline pair (l1: Lens<_,_>) (l2: Lens<_,_>) = 
-        fromGetSet((fun (a,b) -> (l1.Get a, l2.Get b)),
-                   (fun (a,c) (b,d) -> (l1.Set a b, l2.Set c d)))
+        let inline get (a,b) = l1.Get a, l2.Get b
+        let inline set (a,c) (b,d) = l1.Set a b, l2.Set c d
+        fromGetSet(get,set)
 
     /// <summary>
     /// <paramref name="pred"/> is applied to source. 
