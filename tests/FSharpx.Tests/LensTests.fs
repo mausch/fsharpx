@@ -2,6 +2,8 @@
 
 open System
 open NUnit.Framework
+open FsCheck
+open FsCheck.Prop
 open FsCheck.NUnit
 open FSharpx.Lens.Operators
 
@@ -193,12 +195,9 @@ let LensCond() = checkLens "cond" productPrice
 
 [<Test>]
 let LensListMap() = 
-    let l = Lens.listMap Car.mileage
-    // can't test with FsCheck, it passes lists of different lengths.
-    // checkLens "listMap" l
-    let cars = [hondaAccura; bmwE90]
-    let getSet = LensProperties.GetSet l cars
-    let setGet = LensProperties.SetGet l cars [2000;3000]
-    let setSet = LensProperties.SetSet l [2000;3000] [3000;4000] cars
-    for p in [getSet; setGet; setSet] do
-        Assert.True p
+    let lens = Lens.listMap Car.mileage
+    let tname = sprintf "ListMap: %s"
+    fsCheck (tname "GetSet")   (LensProperties.GetSet lens)
+    fsCheck (tname "SetGet")   (forAll Arb.twoListsOfEqualLength (fun (a,b) -> LensProperties.SetGet lens a b))
+    fsCheck (tname "SetSet")   (forAll Arb.threeListsOfEqualLength (fun (a,b,c) -> LensProperties.SetSet lens a b c))
+    fsCheck (tname "UpdateEq") (forAll Arb.listToListFunWithEqualLength (fun f -> LensProperties.UpdateEq lens f))
