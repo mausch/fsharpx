@@ -11,8 +11,8 @@ open NUnit.Framework
 
 let validator pred error value =
     if pred value
-        then Right value
-        else Left [error]
+        then Success value
+        else Failure [error]
 
 let (==) = LanguagePrimitives.PhysicalEquality
 let inline (!=) a b = not (a == b)
@@ -97,8 +97,8 @@ let ``validation with monoid``() =
   // count the number of broken rules
   let validator pred value =
       if pred value
-          then Right value
-          else Left (Sum 1)
+          then Success value
+          else Failure (Sum 1)
   let notEqual a = validator ((<>) a)
   let lengthNotEquals l = validator (fun (x: string) -> x.Length <> l)
   let validateString x = 

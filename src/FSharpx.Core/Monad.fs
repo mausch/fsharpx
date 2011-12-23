@@ -461,19 +461,14 @@ module Choice =
         | None -> Choice2Of2 o
     
     let toValidation = function
-                       | Choice1Of2 x -> Right x
-                       | Choice2Of2 x -> Left  x
+                       | Choice1Of2 x -> Success x
+                       | Choice2Of2 x -> Failure  x
 
 module Validation =
 
     let toChoice = function
-                   | Right x -> Choice1Of2 x
-                   | Left  x -> Choice2Of2 x    
-
-    let (|Success|Failure|) = 
-        function
-        | Right a -> Success a
-        | Left  e -> Failure e
+                   | Success x -> Choice1Of2 x
+                   | Failure  x -> Choice2Of2 x    
 
     let inline seqValidator f = 
         let zero = pure' []

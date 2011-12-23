@@ -250,7 +250,7 @@ module Prelude =
 
 
     // Applicative
-    type Validation< 'err,'v> = Left of 'err | Right of 'v
+    type Validation< 'err,'v> = Failure of 'err | Success of 'v
 
     type Pure = Pure with
         member inline this.Base x = return' x
@@ -260,7 +260,7 @@ module Prelude =
         static member (?<-) (_, _Applicative:Pure, _:'a Async         ) = fun (x:'a) -> Pure.Pure.Base x :'a Async
         static member (?<-) (_, _Applicative:Pure, _:'a Nullable      ) = fun (x:'a) -> Pure.Pure.Base x :'a Nullable
         static member (?<-) (_, _Applicative:Pure, _:Choice<'a,'b>    ) = fun (x:'a) -> Pure.Pure.Base x :Choice<'a,'b>        
-        static member (?<-) (_, _Applicative:Pure, _:Validation<'b,'a>) = fun (x:'a) -> Right x          :Validation<'b,'a>
+        static member (?<-) (_, _Applicative:Pure, _:Validation<'b,'a>) = fun (x:'a) -> Success x          :Validation<'b,'a>
     let inline pure' x : ^R = (() ? (Pure) <- Unchecked.defaultof< ^R>) x
 
 
@@ -273,10 +273,10 @@ module Prelude =
         static member        (?<-) (f:Choice<_,'e>     , _Applicative:Ap, x:Choice<_,'e>     ) = Ap.Ap.Base f x
         static member inline (?<-) (f:Validation< ^e,_>, _Applicative:Ap, x:Validation< ^e,_>) =         
             match f,x with
-            | Right f, Right x -> Right (f x)
-            | Left  e, Right x -> Left e
-            | Right f, Left e  -> Left e
-            | Left e1, Left e2 -> Left (mappend e1 e2)
+            | Success f, Success x -> Success (f x)
+            | Failure  e, Success x -> Failure e
+            | Success f, Failure e  -> Failure e
+            | Failure e1, Failure e2 -> Failure (mappend e1 e2)
     let inline (<*>) x y : ^R = (x ? (Ap) <- y)
 
     let inline lift2 f a b = pure' f <*> a <*> b     // Same as liftM2 but requires just Applicative Functor
