@@ -37,7 +37,10 @@ let greaterThan o = validator ((<?) o)
 let validateOrder (o: Order) =
     let nameNotNull = nonNull "Product name can't be null" o.ProductName
     let positiveCost n = greaterThan (0m).n (sprintf "Cost for product '%s' can't be negative" n) o.Cost
-    (nameNotNull |> toChoice) >>= (positiveCost >> toChoice) |> Choice.map (konst o)
+    // for some reason the following won't compile, expression has to be broken down
+    // ((nameNotNull |> toChoice) >>= (positiveCost >> toChoice)) |> fmap (konst o)
+    let choice = (nameNotNull |> toChoice) >>= (positiveCost >> toChoice)
+    fmap (konst o) choice
 (*    validation {
         let! name = nonNull "Product name can't be null" o.ProductName
         let! _ = greaterThan (0m).n (sprintf "Cost for product '%s' must be positive" name) o.Cost
