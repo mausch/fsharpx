@@ -101,10 +101,8 @@ let ``validation with monoid``() =
           else Failure (Sum 1)
   let notEqual a = validator ((<>) a)
   let lengthNotEquals l = validator (fun (x: string) -> x.Length <> l)
-  let validateString x = 
-    pure' x
-    |> (<* ) (notEqual "hello" x)
-    |> (<* ) (lengthNotEquals 5 x)
+  let validateString x : Validation<_, _> = 
+    pure' x <* notEqual "hello" x <* lengthNotEquals 5 x
   match validateString "hello" with
   | Success c -> failwithf "Valid string: %s" c
   | Failure (Sum e) -> Assert.AreEqual(2, e)
