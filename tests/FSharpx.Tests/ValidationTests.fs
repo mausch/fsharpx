@@ -40,7 +40,7 @@ let validateOrder (o: Order) =
     // for some reason the following won't compile, expression has to be broken down
     // ((nameNotNull |> toChoice) >>= (positiveCost >> toChoice)) |> fmap (konst o)
     let choice = (nameNotNull |> toChoice) >>= (positiveCost >> toChoice)
-    fmap (konst o) choice
+    fmap (konst o) choice |> Choice.toValidation
 (*    validation {
         let! name = nonNull "Product name can't be null" o.ProductName
         let! _ = greaterThan (0m).n (sprintf "Cost for product '%s' must be positive" name) o.Cost
@@ -48,8 +48,7 @@ let validateOrder (o: Order) =
     } *)
     
 
-let validateOrders c = seqValidator (validateOrder >> FSharpx.Choice.toValidation) c |> Validation.toChoice
-
+let validateOrders c = seqValidator validateOrder c
    
 [<Test>]
 let ValidateCustomer() = 
@@ -67,7 +66,7 @@ let ValidateCustomer() =
         <* nonNull "Surname can't be null" customer.Surname
         <* notEqual "foo" "Surname can't be foo" customer.Surname
         <* validateAddress customer.Address
-        <* (validateOrders customer.Orders |> toValidation)
+        <* validateOrders customer.Orders
     match result with
     | Success c -> failwithf "Valid customer: %A" c
     | Failure errors -> 
