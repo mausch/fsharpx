@@ -1,4 +1,5 @@
 ﻿open System
+open FSharpx
 open FSharpx.Undo
 
 module Sample =
@@ -16,4 +17,4 @@ module Sample =
         printfn "The current total is %O" currentVal
         return! handleInput }
 
-Sample.handleInput (newHistory 0.) |> ignore
+State.runState Sample.handleInput (newHistory 0.) |> ignore
