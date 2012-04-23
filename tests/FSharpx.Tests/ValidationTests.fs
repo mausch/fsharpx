@@ -80,10 +80,11 @@ let ValidateCustomer() =
 [<Test>]
 let ``using ap``() =
   let customer = Customer()
-  let result = 
+  let result : Validation<_,_> = 
     pure' (konst2 customer)
-    |> Validation.ap (nonNull "Surname can't be null" customer.Surname)
-    |> Validation.ap (notEqual "foo" "Surname can't be foo" customer.Surname)
+    |> ap (nonNull "Surname can't be null" customer.Surname)
+    // fails compilation, can't figure out why
+    |> ap (notEqual "foo" "Surname can't be foo" customer.Surname)
   match result with
   | Success c -> failwithf "Valid customer: %A" c
   | Failure errors -> 

@@ -157,6 +157,9 @@ module Prelude =
     let inline fmap f x = (() ? (Fmap) <- x) f
 
     // Monad
+
+    type Validation<'v,'err> = Failure of 'err | Success of 'v
+
     type Return = Return with
         static member (?<-) (_, _Monad:Return, _:'a option    ) = fun (x:'a) -> Some x
         static member (?<-) (_, _Monad:Return, _:'a list      ) = fun (x:'a) -> [x]
@@ -164,6 +167,7 @@ module Prelude =
         static member (?<-) (_, _Monad:Return, _:'a Async     ) = fun (x:'a) -> async.Return x
         static member (?<-) (_, _Monad:Return, _:'a Nullable  ) = fun (x:'a) -> Nullable x
         static member (?<-) (_, _Monad:Return, _:Choice<'a,'e>) = fun (x:'a) -> Choice1Of2 x : Choice<'a,'e>
+        static member (?<-) (_, _Monad:Return, _:Validation<'a,'e>) = fun (x:'a) -> Success x : Validation<'a,'e>
     let inline return' x : ^R = (() ? (Return) <- Unchecked.defaultof< ^R> ) x
 
     type Bind = Bind with
@@ -175,10 +179,14 @@ module Prelude =
             match x with
             | Null -> Nullable()
             | Value v -> f v        : Nullable<'b>
-        static member (?<-) (x:Choice<'a,'e>, _Monad:Bind, _:Choice<'b,'e>) = fun (k:_->Choice<'b,_>) ->
+        static member (?<-) (x:Choice<'a,'e>, _Monad:Bind, _:Choice<'b,'e>) = fun (k: _ -> Choice<'b,_>) ->
             match x with
             | Choice2Of2 l -> Choice2Of2 l
             | Choice1Of2 r -> k r
+        static member (?<-) (x:Validation<'a,'e>, _Monad:Bind, _:Validation<'b,'e>) = fun (k: _ -> Validation<'b,_>) ->
+            match x with
+            | Failure l -> Failure l
+            | Success r -> k r
     let inline (>>=) x f : ^R = (x ? (Bind) <- Unchecked.defaultof< ^R> ) f
 
     type DoNotationBuilder() =
@@ -250,7 +258,6 @@ module Prelude =
 
 
     // Applicative
-    type Validation< 'err,'v> = Failure of 'err | Success of 'v
 
     type Pure = Pure with
         member inline this.Base x = return' x
@@ -259,8 +266,8 @@ module Prelude =
         static member (?<-) (_, _Applicative:Pure, _: _ -> 'a         ) = konst : 'a ->_->_ 
         static member (?<-) (_, _Applicative:Pure, _:'a Async         ) = fun (x:'a) -> Pure.Pure.Base x :'a Async
         static member (?<-) (_, _Applicative:Pure, _:'a Nullable      ) = fun (x:'a) -> Pure.Pure.Base x :'a Nullable
-        static member (?<-) (_, _Applicative:Pure, _:Choice<'a,'b>    ) = fun (x:'a) -> Pure.Pure.Base x :Choice<'a,'b>        
-        static member (?<-) (_, _Applicative:Pure, _:Validation<'b,'a>) = fun (x:'a) -> Success x          :Validation<'b,'a>
+        static member (?<-) (_, _Applicative:Pure, _:Choice<'a,'b>    ) = fun (x:'a) -> Pure.Pure.Base x :Choice<'a,'b>
+        static member (?<-) (_, _Applicative:Pure, _:Validation<'a,'b>) = fun (x:'a) -> Success x          :Validation<'a,'b>
     let inline pure' x : ^R = (() ? (Pure) <- Unchecked.defaultof< ^R>) x
 
 
@@ -271,15 +278,18 @@ module Prelude =
         static member        (?<-) (f:_ -> _           , _Applicative:Ap, g: _ -> _          ) = fun x ->   f x (g x)
         static member        (?<-) (f:Async<_>         , _Applicative:Ap, x:Async<_>         ) = Ap.Ap.Base f x
         static member        (?<-) (f:Choice<_,'e>     , _Applicative:Ap, x:Choice<_,'e>     ) = Ap.Ap.Base f x
-        static member inline (?<-) (f:Validation< ^e,_>, _Applicative:Ap, x:Validation< ^e,_>) =         
+        static member inline (?<-) (f:Validation<_, ^e>, _Applicative:Ap, x:Validation<_, ^e>) =
             match f,x with
             | Success f, Success x -> Success (f x)
             | Failure  e, Success x -> Failure e
             | Success f, Failure e  -> Failure e
             | Failure e1, Failure e2 -> Failure (mappend e1 e2)
+
     let inline (<*>) x y : ^R = (x ? (Ap) <- y)
 
-    let inline lift2 f a b = pure' f <*> a <*> b     // Same as liftM2 but requires just Applicative Functor
+    //let inline ap f x = f <*> x
+
+    let inline liftA2 f a b = pure' f <*> a <*> b     // Same as liftM2 but requires just Applicative Functor
 
     /// Sequence actions, discarding the value of the first argument.    
     let inline ( *>) x y = pure' (fun _ z -> z) <*> x <*> y //lift2 (fun _ z -> z) x y

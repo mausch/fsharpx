@@ -176,10 +176,10 @@ module Nullable =
         | Value x, Value y -> op x y
         | _ -> false
 
-    let inline (+?) a b = (lift2 (+)) a b
-    let inline (-?) a b = (lift2 (-)) a b
-    let inline ( *?) a b = (lift2 ( *)) a b
-    let inline (/?) a b = (lift2 (/)) a b
+    let inline (+?) a b = (liftA2 (+)) a b
+    let inline (-?) a b = (liftA2 (-)) a b
+    let inline ( *?) a b = (liftA2 ( *)) a b
+    let inline (/?) a b = (liftA2 (/)) a b
     let inline (>?) a b = (mapBool (>)) a b
     let inline (>=?) a b = a >? b || a = b
     let inline (<?) a b = (mapBool (<)) a b
@@ -462,7 +462,7 @@ module Choice =
     
     let toValidation = function
                        | Choice1Of2 x -> Success x
-                       | Choice2Of2 x -> Failure  x
+                       | Choice2Of2 x -> Failure x
 
 module Validation =
 
@@ -472,10 +472,7 @@ module Validation =
 
     let inline seqValidator f = 
         let zero = pure' []
-        Seq.map (f) >> Seq.fold (lift2 (flip FSharpx.List.cons)) zero
-
-    let inline ap x f  :Validation<_,_> = f <*> x
-
+        Seq.map (f) >> Seq.fold (liftA2 (flip FSharpx.List.cons)) zero
 
 module Continuation =
 

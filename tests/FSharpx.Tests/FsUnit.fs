@@ -12,7 +12,9 @@ let should (f : 'a -> #Constraint) x (y : obj) =
 
 let equal x = new EqualConstraint(x)
 
-let not x = new NotConstraint(x)
+let shouldEqual (x: 'a) (y: 'a) = Assert.AreEqual(x, y, sprintf "Expected: %A\nActual: %A" x y)
+
+//let not x = new NotConstraint(x)
 
 let contain x = new ContainsConstraint(x)
 
