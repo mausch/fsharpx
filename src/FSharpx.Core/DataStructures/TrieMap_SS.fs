@@ -274,7 +274,10 @@ type TrieMap<'Key, 'T when 'Key : equality> =
             | Null -> Seq.empty
             | HKVNode node ->
                 let rec run current =
-                    seq { yield (current.Key, current.Value); if current.Next.IsSome then run current.Next.Value }
+                    seq { 
+                        yield (current.Key, current.Value)
+                        if current.Next.IsSome
+                            then yield! run current.Next.Value }
                 run node
             | Buckets arr ->
                 arr |> Seq.map getItems |> Seq.concat
