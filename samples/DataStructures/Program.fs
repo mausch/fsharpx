@@ -2,7 +2,6 @@
 open FSharpx.TimeMeasurement
 open FSharpx.DataStructures.Vector
 open FSharpx.DataStructures
-open FSharpx.DataStructures.TrieMap_SS
 
 open System
 let c = 5
@@ -21,28 +20,11 @@ let runSomeTest() =
     let fromRep x = (x % 6713, x)
     let times =
         [
-         ("TrieMap", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap.ofSeq)))
-         //("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
-         
-         ("TrieMap", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap.ofSeq)))
-         //("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
-         ("TrieMap", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap.ofSeq)))
-         //("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
-         
+         ("TrieMap_SS", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap_SS.TrieMap.ofSeq)))
+         ("TrieMap_SU", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap_SU.TrieMap.ofSeq)))
+         ("TrieMap_PU", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap_PU.TrieMap.ofSeq)))
          ]
 
-         (*
-    System.GC.Collect(9)
-    let (map, mapTime) = getResultAndTime (fun () -> Seq.init reps (fun x -> (x, x)) |> TrieMap.ofSeq)
-    System.GC.Collect(9)
-    let (map, mapTime_secondary) = getResultAndTime (fun () -> Seq.init reps (fun x -> (x, x)) |> TrieMap.ofSeq)
-    System.GC.Collect(9)
-    let (map, mapTime_tertiary) = getResultAndTime (fun () -> Seq.init reps (fun x -> (x, x)) |> TrieMap.ofSeq)
-    System.GC.Collect(9)
-    let (map2, map2time) = getResultAndTime (fun () -> Seq.init reps (fun x -> (x, x)) |> Experimental.TrieMap_Packed.ofSeq)
-    let something = map.[533]
-    Console.WriteLine(mapTime.ToString() + " " + mapTime_secondary.ToString() + " " + mapTime_tertiary.ToString() + " " + map2time.ToString())
-    *)
     times |> List.iter (fun x -> Console.WriteLine(x.ToString()))
     ()
 runSomeTest()
