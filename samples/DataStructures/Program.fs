@@ -90,6 +90,7 @@ let replaceInArrayAndVector n count =
         "  Array" (fun () -> for i in 1..count do array.[r.Next n] <- r.Next())
         "  PersistentVector" (fun () -> for i in 1..count do assocN (r.Next n) (r.Next()) vector |> ignore)
 
+(*
 initArrayAndVector 10000
 initArrayAndVector 100000
 initArrayAndVector 1000000
@@ -107,6 +108,7 @@ replaceInArrayAndVector 10000 10000
 replaceInArrayAndVector 100000 10000
 replaceInArrayAndVector 1000000 10000
 replaceInArrayAndVector 10000000 10000
+*)
 
 printfn "Ready."
 System.Console.ReadKey() |> ignore
