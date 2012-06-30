@@ -22,7 +22,6 @@ open System.Collections.Generic
 // Current TrieMap implementation is as a struct of 2 elements, trying limiting allocation on the outer node creation.
 
 module TrieMapConstants =
-    let getHashCode x = x.GetHashCode()
     let bucketCountShift = 4 // this seems the sweet spot for performance, 16 (2 ^ 4) buckets
     let shiftAtWhichYouHitBottom = (32 / bucketCountShift) * bucketCountShift
     let bucketCount = 1 <<< bucketCountShift
@@ -116,7 +115,7 @@ type TrieMap<'Key, 'T when 'Key : equality> =
         run originalArray newNode bucketShift
 
     member inline private this.withAddition(k : 'Key, v : 'T) : TrieMap<'Key, 'T> =
-        let h = TrieMapConstants.getHashCode k
+        let h = hash k
         //let hkv = new HKV<'Key, 'T>(k, v, h)
         let newNode = { Key = k; Value = v; Hash = h; Next = None }
         match this.rootNode with
@@ -151,7 +150,7 @@ type TrieMap<'Key, 'T when 'Key : equality> =
                 let index = (keyHash >>> bucketShift) &&& TrieMapConstants.bucketMask
                 find k keyHash (bucketShift + TrieMapConstants.bucketCountShift) arr.[index]
             | Null -> None
-        find k (TrieMapConstants.getHashCode k) 0 this.rootNode
+        find k (hash k) 0 this.rootNode
 
     static member inline private deleteFromNodeList (nodeList : HKVNode<'Key, 'T>) (k : 'Key) : Flagged<HKVNode<'Key, 'T> option> =
         let mutable found = false
@@ -263,7 +262,7 @@ type TrieMap<'Key, 'T when 'Key : equality> =
         match this.rootNode with
         | Null -> this // already empty
         | Buckets arr ->
-            let result = TrieMap<'Key, 'T>.deletedFromArray arr key (TrieMapConstants.getHashCode key) 0
+            let result = TrieMap<'Key, 'T>.deletedFromArray arr key (hash key) 0
             if result.Flag then TrieMap(this.count - 1, result.Value) else this
         | HKVNode node ->
             assert node.Next.IsNone
