@@ -113,7 +113,6 @@ type TrieMap<'Key, 'T when 'Key : equality> =
                 let result = TrieMap<'Key, 'T>.settleCollision node newNode (bucketShift + TrieMapConstants.bucketCountShift)
                 cloned.[index] <- result.Value
                 Flagged<Entry<'Key, 'T> array>(cloned, result.Flag)
-            | _ -> failwith "unknown type"
         run originalArray newNode bucketShift
 
     member inline private this.withAddition(k : 'Key, v : 'T) : TrieMap<'Key, 'T> =
@@ -129,7 +128,6 @@ type TrieMap<'Key, 'T when 'Key : equality> =
         | HKVNode node ->
             let result = TrieMap.settleCollision node newNode 0
             TrieMap((if result.Flag then this.count + 1 else this.count), result.Value)
-        | _ -> failwith "unknown type"
 
     member inline private this.findInTHash (k : 'Key) : 'T option =
         let rec find k (keyHash : int) (bucketShift : int) node = // deliberately don't let null in
@@ -243,7 +241,6 @@ type TrieMap<'Key, 'T when 'Key : equality> =
                         let arr = Array.copy originalArray
                         arr.[index] <- HKVNode node
                         Flagged<Entry<'Key, 'T>>(Buckets arr, true)
-                | _ -> failwith "unknown returned type"
             else
                 Flagged<Entry<'Key, 'T>>(Buckets originalArray, false)
         | HKVNode node ->
@@ -282,7 +279,6 @@ type TrieMap<'Key, 'T when 'Key : equality> =
                 run node
             | Buckets arr ->
                 arr |> Seq.map getItems |> Seq.concat
-            | _ -> failwith "unknown type"
         getItems this.rootNode
 
 
