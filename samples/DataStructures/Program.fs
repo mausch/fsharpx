@@ -14,6 +14,9 @@ let getResultAndTime run =
     let r = run()
     (r, (DateTime.Now - start).TotalMilliseconds)
 
+let mkSasaTrie = 
+    Sasa.Collections.Tree.Empty |> Seq.fold (fun t e -> t.Add(fst e, snd e))
+
 // **************************************************************************************************************
 let runSomeTest() =
     let reps = 1000000
@@ -24,6 +27,7 @@ let runSomeTest() =
          ("TrieMap_SU", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap_SU.TrieMap.ofSeq)))
          ("TrieMap_PU", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap_PU.TrieMap.ofSeq)))
          ("Map", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Map.ofSeq)))
+         ("Sasa", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> mkSasaTrie)))
          ]
 
     times |> List.iter (fun x -> Console.WriteLine(x.ToString()))

@@ -57,6 +57,15 @@
       <HintPath>..\..\lib\FSharp\Net45\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="Sasa">
+      <HintPath>..\..\lib\Sasa\Sasa.dll</HintPath>
+    </Reference>
+    <Reference Include="Sasa.Binary">
+      <HintPath>..\..\lib\Sasa\Sasa.Binary.dll</HintPath>
+    </Reference>
+    <Reference Include="Sasa.Collections">
+      <HintPath>..\..\lib\Sasa\Sasa.Collections.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
