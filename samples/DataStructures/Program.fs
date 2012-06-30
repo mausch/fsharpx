@@ -2,6 +2,7 @@
 open FSharpx.TimeMeasurement
 open FSharpx.DataStructures.Vector
 open FSharpx.DataStructures
+open FSharpx.DataStructures.TrieMap_SS
 
 open System
 let c = 5
@@ -21,12 +22,12 @@ let runSomeTest() =
     let times =
         [
          ("TrieMap", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap.ofSeq)))
-         ("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
+         //("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
          
          ("TrieMap", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap.ofSeq)))
-         ("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
+         //("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
          ("TrieMap", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap.ofSeq)))
-         ("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
+         //("Packed", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Experimental.TrieMap_Packed.ofSeq)))
          
          ]
 
