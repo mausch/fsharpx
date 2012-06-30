@@ -23,6 +23,7 @@ let runSomeTest() =
          ("TrieMap_SS", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap_SS.TrieMap.ofSeq)))
          ("TrieMap_SU", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap_SU.TrieMap.ofSeq)))
          ("TrieMap_PU", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> TrieMap_PU.TrieMap.ofSeq)))
+         ("Map", snd (getResultAndTime (fun () -> Seq.init reps fromRep |> Map.ofSeq)))
          ]
 
     times |> List.iter (fun x -> Console.WriteLine(x.ToString()))
