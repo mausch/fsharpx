@@ -79,18 +79,18 @@ let ValidateCustomer() =
 
 [<Test>]
 let ``using ap``() =
-  let customer = Customer()
-  let result : Validation<_,_> = 
-    pure' (konst2 customer)
-    |> ap (nonNull "Surname can't be null" customer.Surname)
-    // fails compilation, can't figure out why
-    |> ap (notEqual "foo" "Surname can't be foo" customer.Surname)
-  match result with
-  | Success c -> failwithf "Valid customer: %A" c
-  | Failure errors -> 
-      printfn "Invalid customer. Errors:\n%A" errors
-      errors.Length |> should equal 1
-      errors |> should contain "Surname can't be null"
+    let inline ap x = flip ap x
+    let customer = Customer()
+    let result =
+        pure' (konst2 customer)
+        |> ap (nonNull "Surname can't be null" customer.Surname)
+        |> ap (notEqual "foo" "Surname can't be foo" customer.Surname)
+    match result with
+    | Success c -> failwithf "Valid customer: %A" c
+    | Failure errors -> 
+        printfn "Invalid customer. Errors:\n%A" errors
+        errors.Length |> should equal 1
+        errors |> should contain "Surname can't be null"
 
 open Monoid
 
