@@ -34,19 +34,10 @@ open FSharpx.Nullable
 
 let greaterThan o = validator ((<?) o)
 
-let validateOrder (o: Order) =
+let validateOrder (o: Order) : Validation<Order, string list> =
     let nameNotNull = nonNull "Product name can't be null" o.ProductName
     let positiveCost n = greaterThan (0m).n (sprintf "Cost for product '%s' can't be negative" n) o.Cost
-    // for some reason the following won't compile, expression has to be broken down
-    // ((nameNotNull |> toChoice) >>= (positiveCost >> toChoice)) |> fmap (konst o)
-    let choice = (nameNotNull |> toChoice) >>= (positiveCost >> toChoice)
-    fmap (konst o) choice |> Choice.toValidation
-(*    validation {
-        let! name = nonNull "Product name can't be null" o.ProductName
-        let! _ = greaterThan (0m).n (sprintf "Cost for product '%s' must be positive" name) o.Cost
-        return o
-    } *)
-    
+    ((nameNotNull |> toChoice) >>= (positiveCost >> toChoice)) |> fmap (konst o) |> Choice.toValidation
 
 let validateOrders c = seqValidator validateOrder c
    
