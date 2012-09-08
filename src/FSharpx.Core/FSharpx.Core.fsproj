@@ -40,6 +40,7 @@
     <Compile Include="Prelude.fs" />
     <Compile Include="Strings.fs" />
     <Compile Include="IO.fs" />
+    <Compile Include="Collections\Backports.fs" />
     <Compile Include="Collections\Collections.fs" />
     <Compile Include="Collections\ByteString.fs" />
     <Compile Include="Collections\CircularBuffer.fs" />
@@ -55,7 +56,7 @@
     <Compile Include="DataStructures\ImplicitQueue.fs" />
     <Compile Include="DataStructures\RealTimeQueue.fs" />
     <Compile Include="DataStructures\BottomUpMergeSort.fs" />
-    <Compile Include="DataStructures\AltBinaryRandomAccessList.fs" />	
+    <Compile Include="DataStructures\AltBinaryRandomAccessList.fs" />
     <Compile Include="Lens.fs" />
     <Compile Include="CSharpCompat.fs" />
     <Compile Include="Regex.fs" />
@@ -119,4 +120,8 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>$(ProjectDir)\..\..\packages\VariantInterfaces.0.0.1.0\tools\VariantInterfaces.exe $(TargetPath) System.Collections.Generic.IReadOnlyCollection`1/+T System.Collections.Generic.IReadOnlyList`1/+T
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>
