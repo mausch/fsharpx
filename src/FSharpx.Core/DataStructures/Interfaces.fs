@@ -4,15 +4,10 @@ module FSharpx.DataStructures.Interfaces
 type IVector<'a> =
     inherit System.Collections.IEnumerable
     inherit System.Collections.Generic.IEnumerable<'a>
-
-    /// Returns the value at the index. If the index is out of bounds it throws an exception.
-    abstract member Item  : int -> 'a with get
+    inherit System.Collections.Generic.IReadOnlyList<'a>
 
     /// Returns a new vector with the element 'added' at the end.
     abstract member Conj : 'a -> IVector<'a>
-
-    /// Returns the number of items in the collection.
-    abstract member Count : unit -> int
 
     /// Returns the last element in the vector. If the vector is empty it throws an exception.
     abstract member Peek : unit -> 'a

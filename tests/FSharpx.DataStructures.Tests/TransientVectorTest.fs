@@ -10,11 +10,11 @@ let empty() = TransientVector<int>() :> IVector<int>
 
 [<Test>]
 let ``empty vector should be empty``() =    
-    empty().Count() |> should equal 0
+    empty().Count |> should equal 0
 
 [<Test>]
 let ``multiple conj to an empty vector should increase the count``() =
-    empty().Conj(1).Conj(4).Conj(25).Count() |> should equal 3
+    empty().Conj(1).Conj(4).Conj(25).Count |> should equal 3
 
 [<Test>]
 let ``conj to an empty vector should create a singleton vector``() =
@@ -71,10 +71,10 @@ let ``can peek elements from a vector``() =
 [<Test>]
 let ``can pop elements from a vector``() =
     let vector = empty().Conj(1).Conj(4).Conj(25)
-    vector.Count() |> should equal 3
-    vector.Pop().Count()  |> should equal 2
+    vector.Count |> should equal 3
+    vector.Pop().Count  |> should equal 2
     vector.Peek() |> should equal 4
-    vector.Pop().Count()  |> should equal 1
+    vector.Pop().Count  |> should equal 1
     vector.Peek() |> should equal 1
 
 [<Test>]

@@ -187,12 +187,15 @@ type TransientVector<'a> (count,shift:int,root:Node,tail:obj[]) =
               (this.rangedIterator(0,count).GetEnumerator())
                 :> System.Collections.IEnumerator
 
-        interface IVector<'a> with
+        interface System.Collections.Generic.IReadOnlyList<'a> with
+            member this.Count = this.EnsureEditable(); count
             member this.Item 
                 with get i =
                     this.EnsureEditable()
                     let node = this.ArrayFor i
                     node.[i &&& blockIndexMask] :?> 'a
+
+        interface IVector<'a> with
 
             member this.Conj x = this.conj x :> IVector<'a>
 
@@ -222,7 +225,6 @@ type TransientVector<'a> (count,shift:int,root:Node,tail:obj[]) =
                 this :> IVector<'a>
 
             member this.Peek() = if count > 0 then (this :> IVector<'a>).[count - 1] else failwith "Can't peek empty vector"
-            member this.Count() = this.EnsureEditable(); count
             member this.AssocN(i,x) =
                 this.EnsureEditable()
                 if i >= 0 && i < count then
@@ -264,7 +266,7 @@ and PersistentVector<[<EqualityConditionalOn>]'a> (count,shift:int,root:Node,tai
             let v = this :> IVector<'a>
             match other with
             | :? IVector<'a> as y -> 
-                if v.Count() <> y.Count() then false else
+                if v.Count <> y.Count then false else
                 if v.GetHashCode() <> y.GetHashCode() then false else
                 Seq.forall2 (Unchecked.equals) this y
             | _ -> false
@@ -358,12 +360,14 @@ and PersistentVector<[<EqualityConditionalOn>]'a> (count,shift:int,root:Node,tai
               (this.rangedIterator(0,count).GetEnumerator())
                 :> System.Collections.IEnumerator
 
-        interface IVector<'a> with
+        interface System.Collections.Generic.IReadOnlyList<'a> with
+            member this.Count = count
             member this.Item 
                 with get i = 
                     let node = this.ArrayFor i
                     node.[i &&& blockIndexMask] :?> 'a
 
+        interface IVector<'a> with
             member this.Conj x = 
                 if count - tailOff < blockSize then
                     let newTail = Array.append tail [|x:>obj|]
@@ -402,7 +406,6 @@ and PersistentVector<[<EqualityConditionalOn>]'a> (count,shift:int,root:Node,tai
 
                 PersistentVector(count - 1, newshift, newroot, newtail) :> IVector<'a>
 
-            member this.Count() = count
             member this.Peek() = if count > 0 then (this :> IVector<'a>).[count - 1] else failwith "Can't peek empty vector"
 
             member this.AssocN(i,x) = 
@@ -419,7 +422,7 @@ and PersistentVector<[<EqualityConditionalOn>]'a> (count,shift:int,root:Node,tai
 type 'a vector = IVector<'a>
 
 /// Returns the number of items in the collection.
-let inline count (vector:'a vector) : int = vector.Count()
+let inline count (vector:'a vector) : int = vector.Count
 
 let empty<'a> = PersistentVector.Empty() :> IVector<'a>
 
