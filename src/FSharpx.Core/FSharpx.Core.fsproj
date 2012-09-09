@@ -40,7 +40,8 @@
     <Compile Include="Prelude.fs" />
     <Compile Include="Strings.fs" />
     <Compile Include="IO.fs" />
-    <Compile Include="Collections\Backports.fs" />
+    <Compile Include="Collections\Backports.fs" Condition="$(TargetFrameworkVersion) != 'v4.5'"/>
+    <Compile Include="Collections\BackportsTypeForwarding.fs" Condition="$(TargetFrameworkVersion) == 'v4.5'" />
     <Compile Include="Collections\Collections.fs" />
     <Compile Include="Collections\ByteString.fs" />
     <Compile Include="Collections\CircularBuffer.fs" />
@@ -120,7 +121,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition="$(TargetFrameworkVersion) != 'v4.5'">
     <PostBuildEvent>$(ProjectDir)\..\..\packages\VariantInterfaces.0.0.1.0\tools\VariantInterfaces.exe $(TargetPath) System.Collections.Generic.IReadOnlyCollection`1/+T System.Collections.Generic.IReadOnlyList`1/+T
 </PostBuildEvent>
   </PropertyGroup>
