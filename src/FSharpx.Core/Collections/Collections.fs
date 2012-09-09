@@ -131,6 +131,8 @@ module Dictionary =
             member x.Keys = upcast d.Keys 
             member x.Values = upcast d.Values
             member x.Item with get key = d.[key]
+            member x.ContainsKey key = d.ContainsKey key
+            member x.TryGetValue(key, value) = d.TryGetValue(key, ref value)
             member x.GetEnumerator() = d.GetEnumerator()
             member x.GetEnumerator() = d.GetEnumerator() :> IEnumerator }
 
@@ -289,6 +291,12 @@ module NameValueCollection =
                     for i in 0..x.Count-1 do
                         yield x.GetValues i
                 }
+            member d.ContainsKey key = x.[key] <> null
+            member d.TryGetValue(key: string, value: byref<string[]>) = 
+                if d.ContainsKey key then
+                    value <- d.[key]
+                    true
+                else false
             member d.GetEnumerator() = getEnumerator x
             member d.GetEnumerator() = getEnumerator x :> IEnumerator }
 

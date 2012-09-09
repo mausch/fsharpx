@@ -21,3 +21,7 @@ type IReadOnlyDictionary<'TKey, 'TValue> =
     abstract Keys: IEnumerable<'TKey> with get
     /// Gets an enumerable collection that contains the values in the read-only dictionary.
     abstract Values: IEnumerable<'TValue> with get
+    /// Determines whether the read-only dictionary contains an element that has the specified key.
+    abstract ContainsKey: 'TKey -> bool
+    /// Gets the value that is associated with the specified key.
+    abstract TryGetValue: 'TKey * 'TValue byref -> bool
