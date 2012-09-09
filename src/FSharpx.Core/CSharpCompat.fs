@@ -404,6 +404,11 @@ type Dictionary =
   static member TryFind (d, key) = Dictionary.tryFind key d
 
 [<Extension>]
+type ReadOnlyDictionary =
+    [<Extension>]
+    static member TryFind (d, key) = ReadOnlyDictionary.tryFind key d
+
+[<Extension>]
 type EnumerableEx =
     [<Extension>]
     static member FirstOrNone source = Seq.tryFind (konst true) source

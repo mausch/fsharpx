@@ -1,4 +1,5 @@
-﻿using Microsoft.FSharp.Collections;
+﻿using System.Collections.Generic;
+using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
 using NUnit.Framework;
 
@@ -63,5 +64,23 @@ namespace FSharpx.CSharpTests {
             a.TryFind(2).Match(v => { }, 
                                () => Assert.Fail("Should have found value"));
         }
+
+        [Test]
+        public void ReadOnlyList() {
+            var a = FSharpList.Create("a", "b", "c").AsReadOnlyList();
+            // this doesn't compile if the interfaces aren't covariant.
+            SomethingWithList(a);
+            SomethingWithCollection(a);
+        }
+
+        [Test]
+        public void GenericList_as_ReadOnlyList() {
+            IReadOnlyList<string> a = new List<string> { "a", "b", "c" }.AsReadOnlyList();
+            
+        }
+
+        private static void SomethingWithCollection(IReadOnlyCollection<IEnumerable<char>> l) {}
+
+        private static void SomethingWithList(IReadOnlyList<IEnumerable<char>> l) {}
     }
 }

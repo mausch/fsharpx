@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
@@ -26,6 +27,13 @@ namespace FSharpx.CSharpTests {
             var map = FSharpMap.Create(Tuple.Create(1, "one"), Tuple.Create(2, "two"));
             var r = map.TryFind(2).Match(x => x, () => "not found");
             Assert.AreEqual("two", r);
+        }
+
+        [Test]
+        public void ReadOnlyDictionary_TryFind() {
+            IReadOnlyDictionary<int, string> map = FSharpMap.Create(Tuple.Create(1, "one"), Tuple.Create(2, "two")).AsReadOnlyDictionary();
+            Assert.IsNull(map.TryFind(3));
+            Assert.AreEqual("one".Some(), map.TryFind(1));
         }
     }
 }

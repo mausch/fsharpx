@@ -188,7 +188,7 @@ namespace FSharpx.CSharpTests {
         }
 
         static FSharpChoice<FSharpList<Order>, Errors> ValidateOrders(IEnumerable<Order> orders) {
-            var zero = ListModule.Empty<Order>().ReturnValidation();
+            var zero = FSharpList.Create<Order>().ReturnValidation();
             return orders
                 .Select(ValidateOrder)
                 .Aggregate(zero, (e, c) => from a in e

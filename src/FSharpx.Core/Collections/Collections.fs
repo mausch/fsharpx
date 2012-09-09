@@ -32,10 +32,22 @@ module Seq =
         
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<Extension>]
 module Array = 
     let inline nth i arr = Array.get arr i
     let inline setAt i v arr = Array.set arr i v; arr
 
+    [<Extension>]
+    [<CompiledName("AsReadOnlyList")>]
+    let asReadOnlyList (l: _ []) = 
+        { new IReadOnlyList<_> with
+            member x.Count = l.Length
+            member x.Item with get i = l.[i]
+            member x.GetEnumerator() = (l :> _ seq).GetEnumerator()
+            member x.GetEnumerator() = l.GetEnumerator() }
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<Extension>]
 module List =
     /// Curried cons
     let inline cons hd tl = hd::tl
@@ -82,12 +94,45 @@ module List =
     let inline mapIf pred f =
         List.map (fun x -> if pred x then f x else x)
 
+    [<Extension>]
+    [<CompiledName("AsReadOnlyList")>]
+    let asReadOnlyList (l: _ list) = 
+        { new IReadOnlyList<_> with
+            member x.Count = l.Length
+            member x.Item with get i = l.[i]
+            member x.GetEnumerator() = (l :> _ seq).GetEnumerator()
+            member x.GetEnumerator() = (l :> _ seq).GetEnumerator() :> IEnumerator }
+
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<Extension>]
+module ResizeArray =
+    [<Extension>]
+    [<CompiledName("AsReadOnlyList")>]
+    let asReadOnlyList (l: IList<_>) = 
+        { new IReadOnlyList<_> with
+            member x.Count = l.Count
+            member x.Item with get i = l.[i]
+            member x.GetEnumerator() = l.GetEnumerator()
+            member x.GetEnumerator() = l.GetEnumerator() :> IEnumerator }
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<Extension>]
 module Dictionary =
     let tryFind key (d: IDictionary<_,_>) =
         match d.TryGetValue key with
         | true,v -> Some v
         | _ -> None
+
+    [<Extension>]
+    [<CompiledName("AsReadOnlyDictionary")>]
+    let asReadOnlyDictionary (d: IDictionary<_,_>) : IReadOnlyDictionary<_,_> = 
+        { new IReadOnlyDictionary<_,_> with
+            member x.Count = d.Count
+            member x.Keys = upcast d.Keys 
+            member x.Values = upcast d.Values
+            member x.Item with get key = d.[key]
+            member x.GetEnumerator() = d.GetEnumerator()
+            member x.GetEnumerator() = d.GetEnumerator() :> IEnumerator }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<Extension>]
@@ -287,3 +332,10 @@ module NameValueCollection =
             member x.Contains key = this.Get key <> null
             member x.GetEnumerator() = getEnumerator()
             member x.GetEnumerator() = getEnumerator() :> IEnumerator }
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module ReadOnlyDictionary =
+    let tryFind key (d: IReadOnlyDictionary<_,_>) =
+        try
+            Some (d.[key])
+        with :? KeyNotFoundException -> None
