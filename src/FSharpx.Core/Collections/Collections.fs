@@ -211,22 +211,23 @@ module NameValueCollection =
         let s = toSeq a
         s.ToLookup(fst, snd)
 
+    let private getEnumerator (x: NameValueCollection) =
+        let enum = x.GetEnumerator()
+        let wrapElem (o: obj) = 
+            let key = o :?> string
+            let values = x.GetValues key
+            KeyValuePair(key,values)
+        { new IEnumerator<KeyValuePair<string,string[]>> with
+            member e.Current = wrapElem enum.Current
+            member e.MoveNext() = enum.MoveNext()
+            member e.Reset() = enum.Reset()
+            member e.Dispose() = ()
+            member e.Current = box (wrapElem enum.Current) }
+
     [<Extension>]
     [<CompiledName("AsDictionary")>]
     let asDictionary (x: NameValueCollection) =
         let notimpl() = raise <| NotImplementedException()
-        let getEnumerator() =
-            let enum = x.GetEnumerator()
-            let wrapElem (o: obj) = 
-                let key = o :?> string
-                let values = x.GetValues key
-                KeyValuePair(key,values)
-            { new IEnumerator<KeyValuePair<string,string[]>> with
-                member e.Current = wrapElem enum.Current
-                member e.MoveNext() = enum.MoveNext()
-                member e.Reset() = enum.Reset()
-                member e.Dispose() = ()
-                member e.Current = box (wrapElem enum.Current) }
         { new IDictionary<string,string[]> with
             member d.Count = x.Count
             member d.IsReadOnly = false 
@@ -257,8 +258,8 @@ module NameValueCollection =
             member d.Contains item = x.GetValues(item.Key) = item.Value
             member d.ContainsKey key = x.[key] <> null
             member d.CopyTo(array,arrayIndex) = notimpl()
-            member d.GetEnumerator() = getEnumerator()
-            member d.GetEnumerator() = getEnumerator() :> IEnumerator
+            member d.GetEnumerator() = getEnumerator x
+            member d.GetEnumerator() = getEnumerator x :> IEnumerator
             member d.Remove (item: KeyValuePair<string,string[]>) = 
                 if d.Contains item then
                     x.Remove item.Key
@@ -277,30 +278,19 @@ module NameValueCollection =
             }
 
     [<Extension>]
-    [<CompiledName("AsReadonlyDictionary")>]
-    let asReadonlyDictionary x =
-        let a = asDictionary x
-        let notSupported() = raise <| NotSupportedException("Readonly dictionary")
-        { new IDictionary<string,string[]> with
-            member d.Count = a.Count
-            member d.IsReadOnly = true
-            member d.Item 
-                with get k = a.[k]
-                and set k v = notSupported()
-            member d.Keys = a.Keys
-            member d.Values = a.Values
-            member d.Add v = notSupported()
-            member d.Add(key,value) = notSupported()
-            member d.Clear() = notSupported()
-            member d.Contains item = a.Contains item
-            member d.ContainsKey key = a.ContainsKey key
-            member d.CopyTo(array,arrayIndex) = a.CopyTo(array,arrayIndex)
-            member d.GetEnumerator() = a.GetEnumerator()
-            member d.GetEnumerator() = a.GetEnumerator() :> IEnumerator
-            member d.Remove (item: KeyValuePair<string,string[]>) = notSupported(); false
-            member d.Remove (key: string) = notSupported(); false
-            member d.TryGetValue(key: string, value: byref<string[]>) = a.TryGetValue(key, ref value)
-        }                
+    [<CompiledName("AsReadOnlyDictionary")>]
+    let asReadOnlyDictionary (x: NameValueCollection) =
+        { new IReadOnlyDictionary<string,string[]> with
+            member d.Count = x.Count
+            member d.Item with get k = x.GetValues k
+            member d.Keys = Seq.cast x.Keys
+            member d.Values =
+                seq {
+                    for i in 0..x.Count-1 do
+                        yield x.GetValues i
+                }
+            member d.GetEnumerator() = getEnumerator x
+            member d.GetEnumerator() = getEnumerator x :> IEnumerator }
 
     [<Extension>]
     [<CompiledName("AsLookup")>]
