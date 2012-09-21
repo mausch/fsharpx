@@ -4,20 +4,12 @@ using Errors = FSharpx.NonEmptyList<string>;
 
 namespace FSharpx.CSharpTests {
     public class Person {
-        private readonly string name;
-        private readonly int age;
-
-        public string Name {
-            get { return name; }
-        }
-
-        public int Age {
-            get { return age; }
-        }
+        public readonly string Name;
+        public readonly int Age;
 
         private Person(string name, int age) {
-            this.name = name;
-            this.age = age;
+            Name = name;
+            Age = age;
         }
 
         private static readonly Func<string, int, Person> New = (name, age) => new Person(name, age);
