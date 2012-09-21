@@ -12,6 +12,12 @@ namespace FSharpx.CSharpTests {
             Age = age;
         }
 
+        public static readonly Lens<Person, string> NameLens =
+            Lens.Create((Person x) => x.Name, (v, x) => new Person(v, x.Age));
+
+        public static readonly Lens<Person, int> AgeLens =
+            Lens.Create((Person x) => x.Age, (v, x) => new Person(x.Name, v));
+
         private static readonly Func<string, int, Person> New = (name, age) => new Person(name, age);
 
         public static FSharpChoice<Person, Errors> TryNew(string name, int age) {

@@ -483,3 +483,23 @@ type FSharpAsyncEx =
 type FSharpLazy = 
     static member Create (v: _ Func) = Lazy.Create v.Invoke
     static member CreateFromValue v = Lazy.CreateFromValue v
+
+[<Extension>]
+type Lens =
+    static member Create(getter: Func<_,_>, setter: Func<_,_,_>) =
+        let fget = FSharpFunc.FromFunc getter
+        let fset = FSharpFunc.FromFunc setter
+        { Get = fget; Set = fset }
+
+    [<Extension>]
+    static member Get(lens, instance) =
+        Lens.get instance lens
+
+    [<Extension>]
+    static member Set(lens, instance, newValue) =
+        Lens.set newValue instance lens
+
+    [<Extension>]
+    static member Update(lens, instance, update: Func<_,_>) =
+        Lens.update update.Invoke lens instance
+        
