@@ -161,3 +161,12 @@ module Lens =
         let inline (&&&=) l v = updateState l ((&&&) v)
         let inline (&&=) l v = updateState l ((&&) v)
         let inline (=!) l v = setState l v
+
+
+type InstanceLens<'a,'b> = {
+    Instance: 'a
+    Lens: Lens<'a,'b>
+} with
+    member x.Get() = x.Lens.Get x.Instance
+    member x.Set v = x.Lens.Set v x.Instance
+    member x.Update f = x.Lens.Update f x.Instance

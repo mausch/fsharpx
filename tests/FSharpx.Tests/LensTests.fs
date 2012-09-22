@@ -21,6 +21,10 @@ type Car = {
         { Lens.Get = fun (x: Car) -> x.Mileage
           Set = fun v (x: Car) -> { x with Mileage = v } }
 
+    member x.makeL = { InstanceLens.Instance = x; Lens = Car.make }
+    member x.modelL = { InstanceLens.Instance = x; Lens = Car.model }
+    member x.mileageL = { InstanceLens.Instance = x; Lens = Car.mileage }
+
 type Editor = {
     Name: string
     Salary: int
@@ -32,6 +36,9 @@ type Editor = {
     static member car = 
         { Lens.Get = fun (x: Editor) -> x.Car
           Set = fun v (x: Editor) -> { x with Car = v } }
+
+    member x.salaryL = { InstanceLens.Instance = x; Lens = Editor.salary }
+    member x.carL = { InstanceLens.Instance = x; Lens = Editor.car }
 
 type Book = {
     Name: string
@@ -55,8 +62,10 @@ let update() =
     let tom1 = { tom with Salary = tom.Salary + 1000 }
     let tom2 = tom |> Lens.update ((+) 1000) Editor.salary
     let tom3 = tom |> Editor.salary.Update ((+) 1000)
+    let tom4 = tom.salaryL.Update ((+) 1000)
     Assert.AreEqual(tom1, tom2)
     Assert.AreEqual(tom1, tom3)
+    Assert.AreEqual(tom1, tom4)
 
 [<Test>]
 let updateCompose() =
@@ -66,14 +75,15 @@ let updateCompose() =
     let tom2 = tom |> EditorCarModel.Set "Z4"
     let tom3 = tom |> EditorCarModelAlt.Set "Z4"
     let tom4 = EditorCarModel |> Lens.set "Z4" tom
-    let all = [tom1;tom2;tom3;tom4]
-    for i in all do for j in all do Assert.AreEqual(i, j)
+    Assert.AreEqual(tom1, tom2)
+    Assert.AreEqual(tom1, tom3)
+    Assert.AreEqual(tom1, tom4)
 
 [<Test>]
 let pluseq() =
-    let giveRaise = Editor.salary += 1000
     let tom1 = { tom with Salary = tom.Salary + 1000 }
     let tom2 = tom |> Editor.salary += 1000
+    let giveRaise = Editor.salary += 1000
     let tom3 = giveRaise tom
     Assert.AreEqual(tom1, tom2)
     Assert.AreEqual(tom1, tom3)

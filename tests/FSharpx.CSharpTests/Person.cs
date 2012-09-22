@@ -4,19 +4,23 @@ using Errors = FSharpx.NonEmptyList<string>;
 
 namespace FSharpx.CSharpTests {
     public class Person {
-        public readonly string Name;
-        public readonly int Age;
-
-        private Person(string name, int age) {
-            Name = name;
-            Age = age;
-        }
-
         public static readonly Lens<Person, string> NameLens =
             Lens.Create((Person x) => x.Name, (v, x) => new Person(v, x.Age));
 
         public static readonly Lens<Person, int> AgeLens =
             Lens.Create((Person x) => x.Age, (v, x) => new Person(x.Name, v));
+
+        public readonly string Name;
+        public readonly int Age;
+        public readonly InstanceLens<Person, string> NameL;
+        public readonly InstanceLens<Person, int> AgeL;
+
+        private Person(string name, int age) {
+            Name = name;
+            Age = age;
+            NameL = InstanceLens.Create(this, NameLens);
+            AgeL = InstanceLens.Create(this, AgeLens);
+        }
 
         private static readonly Func<string, int, Person> New = (name, age) => new Person(name, age);
 

@@ -502,4 +502,13 @@ type Lens =
     [<Extension>]
     static member Update(lens, instance, update: Func<_,_>) =
         Lens.update update.Invoke lens instance
+
+[<Extension>]
+type InstanceLens =
+    static member Create(instance, lens) = 
+        { InstanceLens.Instance = instance; Lens = lens }        
+
+    [<Extension>]
+    static member Update(lens: InstanceLens<_,_>, update: Func<_,_>) =
+        lens.Update update.Invoke
         
