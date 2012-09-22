@@ -23,6 +23,14 @@ namespace FSharpx.CSharpTests {
         }
 
         [Test]
+        public void SetSet() {
+            var hector = Person.NameLens.Set(john, "hector");
+            var hector56 = Person.AgeLens.Set(hector, 56);
+            Assert.AreEqual("hector", hector56.Name);
+            Assert.AreEqual(56, hector56.Age);
+        }
+
+        [Test]
         public void Update() {
             var johnDoe = Person.NameLens.Update(john, x => x + " doe");
             Assert.AreEqual("john doe", johnDoe.Name);
@@ -43,6 +51,13 @@ namespace FSharpx.CSharpTests {
         public void InstanceSet() {
             var hector = john.NameL.Set("hector");
             Assert.AreEqual("hector", hector.Name);
+        }
+
+        [Test]
+        public void InstanceSetSet() {
+            var hector = john.NameL.Set("hector").AgeL.Set(56);
+            Assert.AreEqual("hector", hector.Name);
+            Assert.AreEqual(56, hector.Age);
         }
 
         [Test]
