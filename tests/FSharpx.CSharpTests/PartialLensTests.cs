@@ -23,22 +23,24 @@ namespace FSharpx.CSharpTests {
             public readonly FSharpOption<string> Name;
             public readonly FSharpOption<StateCity> StateCity;
 
-            public Search(FSharpOption<string> name, FSharpOption<StateCity> stateCity) {
-                Name = name;
-                StateCity = stateCity;
-            }
-
             public static readonly PartialLens<Search, StateCity> StateCityP =
                 PartialLensEx.Create((Search x) => x.StateCity.Select(city => Tuple.Create<Func<StateCity, Search>, StateCity>(n => new Search(x.Name, n.Some()), city)));
 
             public static readonly PartialLens<Search, string> CityP = StateCityP.AndThen(PartialLensTests.StateCity.CityP);
 
+            public readonly InstancePartialLens<Search, string> ICityP;
+
+            public Search(FSharpOption<string> name, FSharpOption<StateCity> stateCity) {
+                Name = name;
+                StateCity = stateCity;
+                ICityP = InstancePartialLens.Create(this, CityP);
+            }
         }
 
         [Test]
         public void SetNoState() {
             var noState = new Search("John".Some(), null);
-            var orlando = Search.CityP.Set(noState, "Orlando");
+            var orlando = noState.ICityP.Set("Orlando");
             Assert.IsNull(orlando.StateCity);
         }
     }

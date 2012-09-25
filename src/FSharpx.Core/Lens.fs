@@ -227,3 +227,8 @@ module PartialLens =
             | [] -> None
             | x::_ as l -> Some ((fun b -> b::l), x)
         PartialLens f
+
+type InstancePartialLens<'a,'b> = {
+    Instance: 'a
+    PartialLens: PartialLens<'a, 'b>
+}

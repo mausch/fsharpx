@@ -547,4 +547,20 @@ type PartialLensEx =
     [<Extension>]
     static member Update(lens, x, f: Func<_,_>) =
         PartialLens.update f.Invoke x lens
-        
+
+[<Extension>]
+type InstancePartialLens =
+    static member Create(instance, lens) = 
+        { InstancePartialLens.Instance = instance; PartialLens = lens }
+
+    [<Extension>]
+    static member Get (lens: InstancePartialLens<_,_>) =
+        PartialLens.get lens.Instance lens.PartialLens
+
+    [<Extension>]
+    static member Set (lens: InstancePartialLens<_,_>, newValue) =
+        PartialLens.set newValue lens.Instance lens.PartialLens
+
+    [<Extension>]
+    static member Update (lens: InstancePartialLens<_,_>, f: Func<_,_>) =
+        PartialLens.update f.Invoke lens.Instance lens.PartialLens
