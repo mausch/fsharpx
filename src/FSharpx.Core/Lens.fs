@@ -170,3 +170,59 @@ type InstanceLens<'a,'b> = {
     member x.Get() = x.Lens.Get x.Instance
     member x.Set v = x.Lens.Set v x.Instance
     member x.Update f = x.Lens.Update f x.Instance
+
+
+type PartialLens<'a,'b> = PartialLens of ('a -> (('b -> 'a) * 'b) option)
+
+module PartialLens =
+    let get x (PartialLens lens) = 
+        lens x |> Option.map snd
+
+    let set v x (PartialLens lens) = 
+        match lens x with
+        | None -> x
+        | Some (setter, _) -> setter v
+
+    let update f x (PartialLens lens) =
+        match lens x with
+        | None -> x
+        | Some (setter, v) -> setter (f v)
+
+    let fromLens l =
+        let setter b a = Lens.set a b l
+        PartialLens (fun x -> Some (setter x, Lens.get x l))
+
+    let compose (PartialLens l2) (PartialLens l1) =
+        let l3 x = 
+            Option.maybe {
+                let! l1s, l1v = l1 x
+                let! l2s, l2v = l2 l1v
+                return l1s << l2s, l2v
+            }
+
+        PartialLens l3
+
+    let some =
+        let f a = Option.map (fun x -> Some, x) a
+        PartialLens f
+
+    let choice1Of2 =
+        let f =
+            function
+            | Choice2Of2 _ -> None
+            | Choice1Of2 x -> Some (Choice1Of2, x)
+        PartialLens f
+
+    let choice2Of2 =
+        let f =
+            function
+            | Choice1Of2 _ -> None
+            | Choice2Of2 x -> Some (Choice2Of2, x)
+        PartialLens f
+
+    let listHead =
+        let f = 
+            function
+            | [] -> None
+            | x::_ as l -> Some ((fun b -> b::l), x)
+        PartialLens f
