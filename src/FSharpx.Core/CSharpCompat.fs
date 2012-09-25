@@ -507,6 +507,10 @@ type Lens =
     static member AndThen(l1, l2) =
         Lens.compose l2 l1
 
+    [<Extension>]
+    static member ToPartialLens lens =
+        PartialLens.fromLens lens
+
 [<Extension>]
 type InstanceLens =
     static member Create(instance, lens) = 
