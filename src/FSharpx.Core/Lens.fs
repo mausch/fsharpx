@@ -174,6 +174,7 @@ type InstanceLens<'a,'b> = {
 
 type PartialLens<'a,'b> = PartialLens of ('a -> (('b -> 'a) * 'b) option)
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module PartialLens =
     let get x (PartialLens lens) = 
         lens x |> Option.map snd

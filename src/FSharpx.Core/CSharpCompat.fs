@@ -520,4 +520,27 @@ type InstanceLens =
     static member AndThen(l1: InstanceLens<_,_>, l2) =
         let l3 = Lens.compose l2 l1.Lens
         InstanceLens.Create(l1.Instance, l3)
+
+[<Extension>]
+type PartialLensEx =
+    static member Create (f: Func<'a, (Func<'b, 'a> * 'b) option>) =
+        let l a = 
+            f.Invoke a |> Option.map (fun (g,v) -> g.Invoke, v)
+        PartialLens l
+
+    [<Extension>]
+    static member AndThen(l1, l2) =
+        PartialLens.compose l2 l1
+
+    [<Extension>]
+    static member Set(lens, x, v) =
+        PartialLens.set v x lens
+
+    [<Extension>]
+    static member Get(lens, x) =
+        PartialLens.get x lens
+
+    [<Extension>]
+    static member Update(lens, x, f: Func<_,_>) =
+        PartialLens.update f.Invoke x lens
         

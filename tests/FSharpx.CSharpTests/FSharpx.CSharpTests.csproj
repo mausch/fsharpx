@@ -66,6 +66,7 @@
     <Compile Include="LazyTests.cs" />
     <Compile Include="LensTests.cs" />
     <Compile Include="NonEmptyListTests.cs" />
+    <Compile Include="PartialLensTests.cs" />
     <Compile Include="StringsTests.cs" />
     <Compile Include="Customer.cs" />
     <Compile Include="DictionaryTests.cs" />
