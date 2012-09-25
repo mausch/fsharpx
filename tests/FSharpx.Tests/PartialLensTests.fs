@@ -25,26 +25,23 @@ type Search = {
 
 let searchCity = Search.stateCityP |> PartialLens.compose StateCity.cityP
 
-let allSome = 
-    { Name = Some "John"; StateCity = Some { State = "Florida"; City = Some "Miami" } }
-
-let noCity = 
-    { Name = Some "John"; StateCity = Some { State = "Florida"; City = None } }
-
-let noState = 
-    { Name = Some "John"; StateCity = None }
-
 [<Test>]
 let setAllSome() =
+    let allSome = 
+        { Name = Some "John"; StateCity = Some { State = "Florida"; City = Some "Miami" } }
     let orlando = searchCity |> PartialLens.set "Orlando" allSome
     Assert.AreEqual(Some "Orlando", orlando.StateCity.Value.City)
     
 [<Test>]
 let setNoCity() =
+    let noCity = 
+        { Name = Some "John"; StateCity = Some { State = "Florida"; City = None } }
     let orlando = searchCity |> PartialLens.set "Orlando" noCity
     Assert.AreEqual(None, orlando.StateCity.Value.City)
 
 [<Test>]
 let setNoState() =
+    let noState = 
+        { Name = Some "John"; StateCity = None }
     let orlando = searchCity |> PartialLens.set "Orlando" noState
     Assert.AreEqual(None, orlando.StateCity)
