@@ -1,6 +1,7 @@
 ﻿module FSharpx.LensTests
 
 open System
+open System.Collections.Generic
 open NUnit.Framework
 open FsCheck
 open FsCheck.NUnit
@@ -168,6 +169,39 @@ let LensSnd() = checkLens "snd" Lens.snd
 
 [<Test>] 
 let LensFstSnd() = checkLens "fst composed with snd" (Lens.fst >>| Lens.snd)
+
+let keyValuePairGen<'a,'b> : Gen<KeyValuePair<'a, 'b>> =
+    gen.Return (fun k v -> KeyValuePair(k,v))
+    |> Gen.ap Arb.generate
+    |> Gen.ap Arb.generate
+
+let keyValuePairArb<'a,'b> : Arbitrary<KeyValuePair<'a, 'b>> =
+    Arb.fromGen keyValuePairGen // TODO shrinking
+
+let keyValuePair2Arb<'a,'b,'c> : Arbitrary<KeyValuePair<'a, 'b> * 'c> =
+    gen.Return tuple2
+    |> Gen.ap keyValuePairGen
+    |> Gen.ap Arb.generate
+    |> Arb.fromGen
+
+let keyValuePair3Arb<'a,'b,'c,'d> : Arbitrary<KeyValuePair<'a, 'b> * 'c * 'd> =
+    gen.Return tuple3
+    |> Gen.ap keyValuePairGen
+    |> Gen.ap Arb.generate
+    |> Gen.ap Arb.generate
+    |> Arb.fromGen
+
+let checkLensKV name lens = 
+    let tname = sprintf "%s: %s" name
+    fsCheck (tname "GetSet") (Prop.forAll keyValuePairArb <| LensProperties.GetSet lens)
+    fsCheck (tname "SetGet") (Prop.forAll keyValuePair2Arb <| fun (kv,a) -> LensProperties.SetGet lens kv a)
+    fsCheck (tname "SetSet") (Prop.forAll keyValuePair3Arb <| fun (kv,a,b) -> LensProperties.SetSet lens a b kv)
+
+//[<Test>]
+//let LensKeyValuePairKey() = checkLensKV "kvkey" Lens.keyValuePairKey
+//
+//[<Test>]
+//let LensKeyValuePairValue() = checkLensKV "kvkey" Lens.keyValuePairValue
 
 [<Test>]
 let LensIgnore() = checkLens "ignore" Lens.ignore

@@ -8,6 +8,8 @@ type Lens<'a,'b> = {
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Lens =
+    open System.Collections.Generic
+
     let inline get a (l: Lens<_,_>) = l.Get a
     let inline set v a (l: Lens<_,_>) = l.Set v a
     let inline update f (l: Lens<_,_>) = l.Update f
@@ -73,6 +75,16 @@ module Lens =
     let snd =
         { Get = Operators.snd
           Set = fun v a -> Operators.fst a, v }
+
+    [<CompiledName("KeyValuePairKey")>]
+    let keyValuePairKey =
+        { Get = fun (x: KeyValuePair<_,_>) -> x.Key
+          Set = fun v a -> KeyValuePair(v, a.Value) }
+
+    [<CompiledName("KeyValuePairValue")>]
+    let keyValuePairValue =
+        { Get = fun (x: KeyValuePair<_,_>) -> x.Value
+          Set = fun v a -> KeyValuePair(a.Key, v) }
 
     /// Identity lens
     let id = 
