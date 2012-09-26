@@ -78,12 +78,12 @@ module Lens =
 
     [<CompiledName("KeyValuePairKey")>]
     let keyValuePairKey =
-        { Get = fun (x: KeyValuePair<_,_>) -> x.Key
+        { Get = fun (KeyValue(key,_)) -> key
           Set = fun v a -> KeyValuePair(v, a.Value) }
 
     [<CompiledName("KeyValuePairValue")>]
     let keyValuePairValue =
-        { Get = fun (x: KeyValuePair<_,_>) -> x.Value
+        { Get = fun (KeyValue(_,value)) -> value
           Set = fun v a -> KeyValuePair(a.Key, v) }
 
     /// Identity lens
