@@ -8,20 +8,18 @@ type StateCity = {
     City: string option
 } with 
     static member cityP =
-        let f (a: StateCity) =
-            let setCity city = { a with City = Some city }
-            a.City |> Option.map (fun city -> setCity, city)
-        PartialLens f
+        let get (a: StateCity) = a.City
+        let set (a: StateCity) city = { a with City = Some city }
+        PartialLens.fromGetSet get set
 
 type Search = {
     Name: string option
     StateCity: StateCity option
 } with
     static member stateCityP =
-        let f (a: Search) =
-            let setStateCity sc = { a with StateCity = Some sc }
-            a.StateCity |> Option.map (fun sc -> setStateCity, sc)
-        PartialLens f
+        let get (a: Search) = a.StateCity
+        let set (a: Search) sc = { a with StateCity = Some sc }
+        PartialLens.fromGetSet get set
 
 let searchCity = Search.stateCityP |> PartialLens.compose StateCity.cityP
 

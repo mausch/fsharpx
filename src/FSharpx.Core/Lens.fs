@@ -193,6 +193,10 @@ module PartialLens =
         let setter b a = Lens.set a b l
         PartialLens (fun x -> Some (setter x, Lens.get x l))
 
+    let fromGetSet get set =
+        let f a = get a |> Option.map (fun v -> set a, v)
+        PartialLens f
+
     let compose (PartialLens l2) (PartialLens l1) =
         let l3 x = 
             Option.maybe {

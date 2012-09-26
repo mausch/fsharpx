@@ -532,6 +532,11 @@ type PartialLensEx =
             f.Invoke a |> Option.map (fun (g,v) -> g.Invoke, v)
         PartialLens l
 
+    static member Create (get: Func<_,_>, set: Func<_,_,_>) =
+        let fget = FSharpFunc.FromFunc get
+        let fset = FSharpFunc.FromFunc set
+        PartialLens.fromGetSet fget fset
+
     [<Extension>]
     static member AndThen(l1, l2) =
         PartialLens.compose l2 l1

@@ -11,7 +11,7 @@ namespace FSharpx.CSharpTests {
             public readonly FSharpOption<string> City;
 
             public static readonly PartialLens<StateCity, string> CityP =
-                PartialLensEx.Create((StateCity x) => x.City.Select(city => Tuple.Create<Func<string, StateCity>, string>(n => new StateCity(x.State, n.Some()), city)));
+                PartialLensEx.Create((StateCity x) => x.City, (x, v) => new StateCity(x.State, v.Some()));
 
             public StateCity(string state, FSharpOption<string> city) {
                 State = state;
@@ -24,7 +24,7 @@ namespace FSharpx.CSharpTests {
             public readonly FSharpOption<StateCity> StateCity;
 
             public static readonly PartialLens<Search, StateCity> StateCityP =
-                PartialLensEx.Create((Search x) => x.StateCity.Select(city => Tuple.Create<Func<StateCity, Search>, StateCity>(n => new Search(x.Name, n.Some()), city)));
+                PartialLensEx.Create((Search x) => x.StateCity, (x,v) => new Search(x.Name, v.Some()));
 
             public static readonly PartialLens<Search, string> CityP = StateCityP.AndThen(PartialLensTests.StateCity.CityP);
 
