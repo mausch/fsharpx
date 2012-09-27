@@ -171,9 +171,11 @@ let LensSnd() = checkLens "snd" Lens.snd
 let LensFstSnd() = checkLens "fst composed with snd" (Lens.fst >>| Lens.snd)
 
 let keyValuePairGen<'a,'b> : Gen<KeyValuePair<'a, 'b>> =
-    gen.Return (fun k v -> KeyValuePair(k,v))
-    |> Gen.ap Arb.generate
-    |> Gen.ap Arb.generate
+    gen {
+        let! k = Arb.generate
+        let! v = Arb.generate
+        return KeyValuePair(k,v)
+    }
 
 let keyValuePairArb<'a,'b> : Arbitrary<KeyValuePair<'a, 'b>> =
     Arb.fromGen keyValuePairGen // TODO shrinking
@@ -197,11 +199,11 @@ let checkLensKV name lens =
     fsCheck (tname "SetGet") (Prop.forAll keyValuePair2Arb <| fun (kv,a) -> LensProperties.SetGet lens kv a)
     fsCheck (tname "SetSet") (Prop.forAll keyValuePair3Arb <| fun (kv,a,b) -> LensProperties.SetSet lens a b kv)
 
-//[<Test>]
-//let LensKeyValuePairKey() = checkLensKV "kvkey" Lens.keyValuePairKey
-//
-//[<Test>]
-//let LensKeyValuePairValue() = checkLensKV "kvkey" Lens.keyValuePairValue
+[<Test>]
+let LensKeyValuePairKey() = checkLensKV "KvKey" Lens.keyValuePairKey
+
+[<Test>]
+let LensKeyValuePairValue() = checkLensKV "KvValue" Lens.keyValuePairValue
 
 [<Test>]
 let LensIgnore() = checkLens "ignore" Lens.ignore
