@@ -87,109 +87,48 @@ module BKTree =
                 let size = subtree |> Dictionary.valueList |> List.map size |> List.sum |> (+) 1
                 Node(b, size, subtree)
 
-    module Int =
+    type 'a Functions(distance: 'a -> 'a -> int) = 
+        member x.distance = distance
+        member x.insert a tree = insert distance a tree
+        member x.exists a tree = exists distance a tree
+        member x.existsDistance n a tree = existsDistance distance n a tree
+        member x.elemsDistance n a tree = elemsDistance distance n a tree
+        member x.fromList xs = fromList distance xs
+        member x.unions xs = unions distance xs
+        member x.union t1 t2 = x.unions [t1; t2]
+        member x.delete a tree = delete distance a tree
 
-        let distance i j = abs(i - j)
+    let Int = Functions(fun i j -> abs(i - j))
+    let Char = Functions(fun i j -> abs((int i) - (int j)))
 
-        let insert a tree = insert distance a tree
-
-        let exists a tree = exists distance a tree
-  
-        let existsDistance n a tree = existsDistance distance n a tree
-
-        let elemsDistance n a tree = elemsDistance distance n a tree
-
-        let fromList xs = fromList distance xs
-
-        let unions xs = unions distance xs
-
-        let union t1 t2 = unions [t1; t2]
-
-        let delete a tree = delete distance a tree
-
-    module Char =
-
-        let distance(i:char) (j:char) = abs((int i) - (int j))
-
-        let insert a tree = insert distance a tree
-
-        let exists a tree = exists distance a tree
-
-        let existsDistance n a tree = existsDistance distance n a tree
-
-        let elemsDistance n a tree = elemsDistance distance n a tree
-
-        let fromList xs = fromList distance xs
-
-        let unions xs = unions distance xs
-
-        let union t1 t2 = unions [t1; t2]
-
-        let delete a tree = delete distance a tree
-
-    module List =
-
-        let private hirschberg xs = function
-            | [] -> List.length xs
-            | ys ->
-                let lys = List.length ys
-                let startArr = [1..lys] |> List.map (fun x -> (x,x))
-                xs
-                |> Seq.zip (Seq.unfold (fun i -> Some(i+1, i+1)) 0)
-                |> Seq.toList
-                |> List.fold (fun arr (i,xi) ->
-                    ys
-                    |> List.zip (List.sortBy fst arr)
-                    |> List.mapAccum (fun (s,c) ((j,el),yj) ->
-                        let nc = List.min [s + (if xi = yj then 0 else 1); el + 1; c + 1]
-                        ((el,nc),(j,nc))
-                    ) (i - 1, i)
-                    |> snd
-                ) startArr
-                |> List.find (fst >> (=) lys)
+    let private hirschberg xs = function
+        | [] -> List.length xs
+        | ys ->
+            let lys = List.length ys
+            let startArr = [1..lys] |> List.map (fun x -> (x,x))
+            xs
+            |> Seq.zip (Seq.unfold (fun i -> Some(i+1, i+1)) 0)
+            |> Seq.toList
+            |> List.fold (fun arr (i,xi) ->
+                ys
+                |> List.zip (List.sortBy fst arr)
+                |> List.mapAccum (fun (s,c) ((j,el),yj) ->
+                    let nc = List.min [s + (if xi = yj then 0 else 1); el + 1; c + 1]
+                    ((el,nc),(j,nc))
+                ) (i - 1, i)
                 |> snd
+            ) startArr
+            |> List.find (fst >> (=) lys)
+            |> snd
 
-        let distance = hirschberg
+    [<GeneralizableValue>]
+    let List<'a when 'a : equality> : 'a list Functions = Functions hirschberg
 
-        let insert a tree = insert distance a tree
+    let private byteStringDistance xs = function
+        | ys when ByteString.isEmpty ys -> ByteString.length xs
+        | ys ->
+            let xs = ByteString.toList xs
+            let ys = ByteString.toList ys
+            hirschberg xs ys
 
-        let exists a tree = exists distance a tree
-
-        let existsDistance n a tree = existsDistance distance n a tree
-
-        let elemsDistance n a tree = elemsDistance distance n a tree
-
-        let fromList xs = fromList distance xs
-
-        let unions xs = unions distance xs
-
-        let union t1 t2 = unions [t1; t2]
-
-        let delete a tree = delete distance a tree
-
-    module ByteString =
-
-        open ByteString
-
-        let distance xs = function
-            | ys when ByteString.isEmpty ys -> ByteString.length xs
-            | ys ->
-                let xs = ByteString.toList xs
-                let ys = ByteString.toList ys
-                List.distance xs ys
-
-        let insert a tree = insert distance a tree
-
-        let exists a tree = exists distance a tree
-
-        let existsDistance n a tree = existsDistance distance n a tree
-
-        let elemsDistance n a tree = elemsDistance distance n a tree
-
-        let fromList xs = fromList distance xs
-
-        let unions xs = unions distance xs
-
-        let union t1 t2 = unions [t1; t2]
-
-        let delete a tree = delete distance a tree
+    let ByteString = Functions byteStringDistance
