@@ -655,6 +655,21 @@ module Writer =
 
     let inline mapM f x = sequence (List.map f x)
 
+type 'a Error =
+    abstract NoMessage : 'a
+    abstract StringMessage: string -> 'a
+
+module Error =
+    let String = 
+        { new Error<string> with
+            member x.NoMessage = ""
+            member x.StringMessage s = s }
+
+    let Exception =
+        { new Error<exn> with
+            member x.NoMessage = System.Exception()
+            member x.StringMessage s = System.Exception(s) }
+
 module Choice =
     /// Inject a value into the Choice type
     let returnM = Choice1Of2
@@ -742,6 +757,14 @@ module Choice =
         member this.Return a = returnM a
         member this.Bind (m, f) = bind f m
         member this.ReturnFrom m = m
+        member this.Combine(m,f) = bind f m
+        member this.Delay f = f
+        member this.Run f = f()
+
+    type EitherPlusBuilder<'a>(err: 'a Error) =
+        inherit EitherBuilder()
+        member this.Zero() = Choice2Of2 err.NoMessage
+        member this.error s = Choice2Of2 (err.StringMessage s)
 
     let choose = EitherBuilder()
 

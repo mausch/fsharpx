@@ -110,3 +110,20 @@ let ``monad laws``() =
             let b = v >>= (fun x -> f x >>= g)
             a = b
 
+[<Test>]
+let ``eitherplus zero``() =
+    let r = EitherPlusBuilder Error.String {
+        if false then return 0
+    }
+    r |> should equal (Choice2Of2 "" : Choice<int,string>)
+
+[<Test>]
+let ``eitherplus explicit error``() =
+    let choose = EitherPlusBuilder Error.String
+    let r = choose {
+        if true 
+            then return! choose.error "blah"
+        return 0
+    }
+    r |> should equal (Choice2Of2 "blah" : Choice<int,string>)
+    
