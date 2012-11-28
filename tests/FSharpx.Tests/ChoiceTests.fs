@@ -126,4 +126,11 @@ let ``eitherplus explicit error``() =
         return 0
     }
     r |> should equal (Choice2Of2 "blah" : Choice<int,string>)
-    
+
+[<Test>]
+let ``eitherzero zero``() =
+    let r = EitherZeroBuilder "" {
+        if false then return 0
+    }
+    r |> should equal (Choice2Of2 "" : Choice<int,string>)
+        

@@ -766,6 +766,10 @@ module Choice =
         member this.Zero() = Choice2Of2 err.NoMessage
         member this.error s = Choice2Of2 (err.StringMessage s)
 
+    type EitherZeroBuilder<'a>(zero: 'a) =
+        inherit EitherBuilder()
+        member this.Zero() = Choice2Of2 zero        
+
     let choose = EitherBuilder()
 
     /// If Choice is 1Of2, returns Some value. Otherwise, returns None.
